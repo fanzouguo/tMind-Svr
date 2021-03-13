@@ -1,0 +1,9 @@
+/build/
+/dist/
+/*.dts
+/src/assets/
+/public/
+/0_tobeDel/
+/node_modules/
+/lib*/
+.*
