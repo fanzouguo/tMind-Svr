@@ -1,6 +1,6 @@
 /* eslint-disable no-undef */
 
-export default class Tmind implements Tmind {
+module.exports = class Tmind implements Tmind {
 	// public namea = '333';
 	constructor() {
 		// this.namea = '222';
@@ -9,4 +9,4 @@ export default class Tmind implements Tmind {
 		// console.log(x);
 		console.log('已实例化');
 	}
-}
+};
