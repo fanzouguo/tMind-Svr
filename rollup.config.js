@@ -1,73 +1,63 @@
 // @ts-nocheck
-	import resolve from 'rollup-plugin-node-resolve';
-	import babelPlugin from 'rollup-plugin-babel';
-	import commonjs from 'rollup-plugin-commonjs';
-	import jsonPlugin from '@rollup/plugin-json';
-	import { terser } from 'rollup-plugin-terser';
-	const { getCurrPath } = require('./lib/util/getPath');
-	const { getFromat } = require('./lib/util/getDate');
-	const isProd = (process.env.NODE_ENV === 'prod' || process.env.NODE_ENV === 'production');
+/* eslint-disable */
+const resolve = require('rollup-plugin-node-resolve');
+const { babel } = require('@rollup/plugin-babel');
+const { terser } = require('rollup-plugin-terser');
+const dts = require('rollup-plugin-dts').default;
+// const commonjs = require('rollup-plugin-commonjs');
+// const jsonPlugin = require('@rollup/plugin-json');
+const pkg = require('./package.json');
 
-	const banner = `/*!
-	* tMind-Cli v1.0.0
-	* (c) 2021-2022  Smpoo soft Co. Shanghai China
-	* Released under the MIT License.
-	* Author: David
-	* CreateDate: 2021-03-05
-	* LastBuild: ${getFromat('yyyy-mm-dd hh:mi:ss.ms')}
-	*/`;
+const { getPathSpec } = require('./.debug/getPath');
+const getDate = require('./.debug/getDate');
+const basePath = process.cwd();
 
-	const outForlder = isProd ? ['lib'] : ['.debug', 'tryNow', 'lib'];
+const banner = `/*!
+* tMind-Cli v1.0.0
+* (c) 2021-2022  Smpoo soft Co. Shanghai China
+* Released under the MIT License.
+* Author: David
+* CreateDate: 2021-03-05
+* LastBuild: ${getDate()}
+*/`;
 
-	const _objConf = {
-		// 入口文件
-		input: getCurrPath('dist', 'index.js'),
-		// 出口文件
-		output: {
-			file: getCurrPath(...outForlder, 'index.js'),
-			format: 'umd',
-			name: 'tmind',
-			banner
-		},
-		// // 作用：指出应将哪些模块视为外部模块，否则会被打包进最终的代码里
-		external: [
-			'inquirer',
-			'fs-exta',
-			'glob-all'
-		]
-	};
-
-	if (isProd) {
-		_objConf.plugins = [
-			commonjs(),
-			resolve({
-				customResolveOptions: {
-					moduleDirectory: 'node_modules'
-				}
-			}),
-			jsonPlugin(),
-			terser()
-		];
-	} else {
-		_objConf.plugins = [
-			commonjs(),
-			resolve({
-				customResolveOptions: {
-					moduleDirectory: 'node_modules'
-				}
-			}),
-			babelPlugin({
-				// 只编译源码
-				exclude: 'node_modules/**'
-			}),
-			jsonPlugin()
-			// 使用开发服务插件
-			// serve({
-			// 	port: 3000,
-			// 	// 设置 exmaple的访问目录和dist的访问目录
-			// 	contentBase: [getCurrPath('.debug', 'tryNow'), getCurrPath(...outForlder)]
-			// })
-		];
-	}
-
-	export default _objConf;
+export default [{
+	// 入口文件
+	// input: getPathSpec(basePath, 'src/index.ts'),
+	input: getPathSpec(basePath, '.debug/dist/index.js'),
+	// 出口文件
+	output: {
+		// file: getPathSpec(basePath, 'lib', 'index.js'),
+		file: getPathSpec(basePath, pkg.main),
+		format: 'commonjs',
+		name: 'Tmind',
+		banner
+	},
+	// // 作用：指出应将哪些模块视为外部模块，否则会被打包进最终的代码里
+	external: [],
+	plugins: [
+		babel({
+			exclude: 'node_modules/**',
+			babelHelpers: 'bundled'
+		}),
+		// commonjs(),
+		resolve({
+			customResolveOptions: {
+				moduleDirectory: 'node_modules'
+			}
+		}),
+		// jsonPlugin(),
+		terser()
+	]
+},
+// 生成 .d.ts 类型声明文件
+{
+	// input: getPathSpec(basePath, 'src/index.ts'),
+	input: getPathSpec(basePath, '.debug/dist/index.js'),
+	output: {
+		file: getPathSpec(basePath, pkg.typings),
+		// format: 'es'
+		format: 'commonjs'
+	},
+	plugins: [dts()]
+}];

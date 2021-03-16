@@ -1,44 +1,42 @@
 {
-	"name": "tmind-svr",
-	"version": "1.0.0",
-	"description": "This project is automatic created by tMind-CLI for tFrameV9 of smpoo Co. in 2021-03-13 08:46:26.442",
-	"private": true,
-	"scripts": {
-	"dev": "yarn lint && vue-cli-service serve",
-	"build": "yarn lint && vue-cli-service build --modern --report",
-	"pkg": "vue-cli-service build --report",
-	"test:unit": "vue-cli-service test:unit",
-	"test:e2e": "vue-cli-service test:e2e",
-	"lint": "vue-cli-service lint",
-	"prebuild": "node ./app.dev/preBuild.js",
-	"postbuild": "node ./app.dev/postBuild.js",
-	"lint": "eslint src --ext .ts"
-},
-	"repository": {
-		"type": "git",
-		"url": ""
-	},
-	"keywords": [
-		"Smpoo",
-		"tFrame"
-	],
-	"author": "上海深普软件.Co.David",
-	"license": "MIT",
-	"bugs": {
-		"url": ""
-	},
-	"homepage": "www.smpoo.com",
-	"dependencies": {
+  "name": "tmind-svr",
+  "version": "1.0.5",
+  "description": "This project is automatic created by tMind-CLI for tFrameV9 of smpoo Co. in 2021-03-13 07:02:42.668",
+  "private": false,
+  "main": "lib/index.js",
+  "typings": "lib/index.d.ts",
+  "scripts": {
+    "clean": "shx rm -rf lib .debug/dist",
+    "dev": "ts-node --files ./.debug/index.ts",
+    "build": "yarn lint && yarn clean && tsc && node ./.debug/preBuild.js && cross-env NODE_ENV=prod rollup -c ./rollup.config.js && node ./.debug/postBuild.js",
+    "lint": "eslint src --ext .ts"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git@github.com:fanzouguo/tMind-Svr.git"
+  },
+  "keywords": [
+    "Smpoo",
+    "tFrame"
+  ],
+  "author": "上海深普软件.Co.David",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/fanzouguo/tMind-Svr/issues"
+  },
+  "homepage": "https://github.com/fanzouguo/tMind-Svr#readme",
+  "dependencies": {
     "core-js": "~3.9.1"
-	},
-	"devDependencies": {
-		"eslint": "~6.8.0",
+  },
+  "devDependencies": {
+    "eslint": "~6.8.0",
     "eslint-plugin-import": "~2.20.2",
     "eslint-plugin-node": "~11.1.0",
     "eslint-plugin-promise": "~4.2.1",
     "eslint-plugin-standard": "~4.0.0",
     "typescript": "~4.2.2",
     "ts-node": "~9.1.1"
-	},
-  "createAt": "2021-03-13 08:46:26.442"
+  },
+  "createAt": "2021-03-13 07:02:42.668",
+  "lastBuild": "2021-03-17 03:52:10.391"
 }

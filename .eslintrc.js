@@ -7,13 +7,16 @@ module.exports = {
   parser: '@typescript-eslint/parser',
   // 指定ts解析插件
   plugins: ['@typescript-eslint/eslint-plugin'],
-	extends: [
-		'plugin:vue/vue3-essential',
-		'@vue/standard',
-		'@vue/typescript/recommended'
-	],
+	extends: [],
 	parserOptions: {
 		ecmaVersion: 2020
+	},
+	globals: {
+		dateLike: true,
+		boolLike: true,
+		MSG_TYPE: true,
+		IObj: true,
+		IKv: true,
 	},
 	// 规则配置写在这里
 	rules: {
@@ -89,7 +92,8 @@ module.exports = {
 		'space-before-function-paren': 0,
 		'no-tabs': 'off',
 		'linebreak-style': ['off', 'windows'],
-		'@typescript-eslint/no-var-requires': 'off'
+		'@typescript-eslint/no-var-requires': 'off',
+		'@typescript-eslint/interface-name-prefix': 'off'
 	},
 	overrides: [
 		{
