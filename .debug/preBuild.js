@@ -1,25 +1,15 @@
+// import inquirer from 'inquirer';
+// import fs from 'fs-extra';
+// import path from 'path';
+// import tmind from 'tmind-core';
+
 const inquirer = require('inquirer');
 const fs = require('fs-extra');
 const path = require('path');
 const pkg = fs.readJsonSync('./package.json');
+const { tDate } = require('tmind-core');
 
 const resetVer = (async () => {
-	const getDate = () => {
-		const frm = (str, len = 2) => {
-			return `${str}`.padStart(len, '0');
-		};
-
-		const _dt = new Date();
-		const _y = _dt.getFullYear();
-		const _m = frm(_dt.getMonth() + 1);
-		const _d = frm(_dt.getDate());
-		const _hh = frm(_dt.getHours());
-		const _mi = frm(_dt.getMinutes());
-		const _ss = frm(_dt.getSeconds());
-		const _sss = frm(_dt.getMilliseconds());
-		return `${_y}-${_m}-${_d} ${_hh}:${_mi}:${_ss}.${_sss}`;
-	};
-
 	const VER_POLICY = {
 		major: 0,
 		minor: 1,
@@ -51,7 +41,7 @@ const resetVer = (async () => {
 		}
 	});
 	pkg.version = _arr.join('.');
-	pkg.lastBuild = getDate();
+	pkg.lastBuild = tDate().format('YYYY-MM-DD hh:mi:ss.ms');
 	fs.writeFileSync(path.resolve(process.cwd(), 'package.json'), JSON.stringify(pkg, null, 2));
 	console.clear();
 	console.log(`本次构建版本号为：${pkg.version}`);

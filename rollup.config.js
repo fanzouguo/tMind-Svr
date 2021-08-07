@@ -1,22 +1,22 @@
 // @ts-nocheck
-/* eslint-disable */
 const resolve = require('rollup-plugin-node-resolve');
 const { babel } = require('@rollup/plugin-babel');
 const { terser } = require('rollup-plugin-terser');
+const { tDate } = require('tmind-core');
 const tsPlugin = require('rollup-plugin-typescript2');
 const commonjs = require('rollup-plugin-commonjs');
 const pkg = require('./package.json');
 const isProd = (process.env.NODE_ENV === 'prod' || process.env.NODE_ENV === 'production');
 const { getPathSpec } = require('./.debug/getPath');
-const getDate = require('./.debug/getDate');
 const basePath = process.cwd();
+
 const banner = `/*!
 * tMind-Svr v${pkg.version}
 * (c) 2021-2022  Smpoo soft Co. Shanghai China
 * Released under the MIT License.
 * Author: David
 * CreateDate: 2021-03-05
-* LastBuild: ${getDate()}
+* LastBuild: ${tDate().format('YYYY-MM-DD hh:mi:ss')}
 */`;
 
 const extensions = [
@@ -39,10 +39,11 @@ const plugins = [
 	}),
 	tsPlugin({
 		// 导入本地ts配置
-		tsconfig: getPathSpec(basePath, './tsconfig.json'),
+		tsconfig: getPathSpec(basePath, 'src/tsconfig.json'),
 		tsconfigOverride: {
 			compilerOptions: {
 				module: 'ESNext'
+				// module: 'commonjs'
 			}
 		},
 		extensions

@@ -1,13 +1,12 @@
 {
   "name": "tmind-svr",
-  "version": "1.0.0",
+  "version": "1.0.5",
   "description": "The server class for tframe V9 of smpoo soft comporation.",
+  "private": false,
   "main": "lib/inidex.js",
-  "author": "David",
-  "license": "MIT",
-  "private": true,
+  "module": "lib/index.esm.js",
   "type": "commonjs",
-  "types": "lib/@types",
+  "types": "lib/@types/index.d.ts",
   "scripts": {
     "clean": "shx rm -rf lib",
     "prePkg": "yarn lint && yarn clean",
@@ -16,9 +15,23 @@
     "runTs": "ts-node -r tsconfig-paths/register ./src/app.ts --files",
     "dev": "nodemon --config ./nodemon.json -w src/**/*.ts -x \"ts-node -r tsconfig-paths/register --files\" ./src/app.ts",
     "dev:debug": "nodemon --config ./nodemon.json --inspect-brk ./src/app.ts",
-    "build": "yarn prePkg && node ./.debug/preBuild.js && cross-env NODE_ENV=prod  yarn pkg && node ./.debug/postBuild.js",
+    "build": "yarn clean && node ./.debug/preBuild.js && cross-env NODE_ENV=prod  yarn pkg && node ./.debug/postBuild.js",
     "lint": "eslint . --ext .js"
   },
+  "repository": {
+    "type": "git",
+    "url": "git@github.com:fanzouguo/tMind-Svr.git"
+  },
+  "keywords": [
+    "Smpoo",
+    "tFrame"
+  ],
+  "author": "上海深普软件.Co.David",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/fanzouguo/tMind-Svr/issues"
+  },
+  "homepage": "https://github.com/fanzouguo/tMind-Svr#readme",
   "dependencies": {
     "@babel/register": "^7.14.5",
     "@babel/runtime": "^7.14.6",
@@ -86,5 +99,7 @@
     "ts-node": "^9.1.1",
     "tsconfig-paths": "^3.10.1",
     "typescript": "~3.9.3"
-  }
+  },
+  "createAt": "2021-03-13 07:02:42.668",
+  "lastBuild": "2021-08-08 05:09:19.223"
 }
