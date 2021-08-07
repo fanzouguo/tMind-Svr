@@ -3,6 +3,8 @@ const inquirer = require('inquirer');
 const fs = require('fs-extra');
 const path = require('path');
 const pkg = fs.readJsonSync('./package.json');
+const { ncp } = require('ncp');
+const { promisify } = require('util');
 
 const pathUser = process.env.HOME || process.env.USERPROFILE || '';
 const color = {
@@ -80,6 +82,9 @@ const getGitCmd = (memo, pkg, tagThis = false, branch = 'main') => {
 const pushToGithub = async () => {
 	echo('准备提交 GITHUB', '步骤1', 'INFO');
 	try {
+		const _buildRoot = process.cwd();
+		await promisify(ncp)(path.resolve(_buildRoot, 'src/@types'),  path.resolve(_buildRoot, 'lib/@types/'));
+
 		const { commitMemo } = await inquirer.prompt({
 			type: 'input',
 			message: '请输入提交备注',

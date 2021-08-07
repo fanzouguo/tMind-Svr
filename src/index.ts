@@ -1,12 +1,12 @@
-/* eslint-disable no-undef */
+import KoaSvr from './core/koaSvr';
+import DbSvr from './core/dbSvr';
+// const KoaSvr = require('./core/koaSvr/index');
 
-module.exports = class Tmind implements Tmind {
-	// public namea = '333';
-	constructor() {
-		// this.namea = '222';
-		// const x: MSG_TYPE = MSG_TYPE.ERR;
-		/* eslint-disable no-console */
-		// console.log(x);
-		console.log('已实例化');
-	}
+// module.exports = {
+// 	KoaSvr
+// };
+
+export default {
+	KoaSvr,
+	DbSvr
 };

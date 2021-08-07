@@ -3,17 +3,15 @@
 const resolve = require('rollup-plugin-node-resolve');
 const { babel } = require('@rollup/plugin-babel');
 const { terser } = require('rollup-plugin-terser');
-const dts = require('rollup-plugin-dts').default;
-// const commonjs = require('rollup-plugin-commonjs');
-// const jsonPlugin = require('@rollup/plugin-json');
+const tsPlugin = require('rollup-plugin-typescript2');
+const commonjs = require('rollup-plugin-commonjs');
 const pkg = require('./package.json');
-
+const isProd = (process.env.NODE_ENV === 'prod' || process.env.NODE_ENV === 'production');
 const { getPathSpec } = require('./.debug/getPath');
 const getDate = require('./.debug/getDate');
 const basePath = process.cwd();
-
 const banner = `/*!
-* tMind-Cli v1.0.0
+* tMind-Svr v${pkg.version}
 * (c) 2021-2022  Smpoo soft Co. Shanghai China
 * Released under the MIT License.
 * Author: David
@@ -21,43 +19,66 @@ const banner = `/*!
 * LastBuild: ${getDate()}
 */`;
 
-export default [{
-	// 入口文件
-	// input: getPathSpec(basePath, 'src/index.ts'),
-	input: getPathSpec(basePath, '.debug/dist/index.js'),
-	// 出口文件
-	output: {
-		// file: getPathSpec(basePath, 'lib', 'index.js'),
-		file: getPathSpec(basePath, pkg.main),
-		format: 'commonjs',
-		name: 'Tmind',
-		banner
-	},
-	// // 作用：指出应将哪些模块视为外部模块，否则会被打包进最终的代码里
-	external: [],
-	plugins: [
-		babel({
-			exclude: 'node_modules/**',
-			babelHelpers: 'bundled'
-		}),
-		// commonjs(),
-		resolve({
-			customResolveOptions: {
-				moduleDirectory: 'node_modules'
+const extensions = [
+	'.js',
+	'.ts'
+];
+
+// 通用插件组配置
+const plugins = [
+	babel({
+		exclude: 'node_modules/**',
+		babelHelpers: 'bundled'
+	}),
+	commonjs(),
+	resolve({
+		cwd: 'babelrc',
+		customResolveOptions: {
+			moduleDirectory: 'node_modules'
+		}
+	}),
+	tsPlugin({
+		// 导入本地ts配置
+		tsconfig: getPathSpec(basePath, './tsconfig.json'),
+		tsconfigOverride: {
+			compilerOptions: {
+				module: 'ESNext'
 			}
-		}),
-		// jsonPlugin(),
-		terser()
-	]
-},
-// 生成 .d.ts 类型声明文件
-{
-	// input: getPathSpec(basePath, 'src/index.ts'),
-	input: getPathSpec(basePath, '.debug/dist/index.js'),
-	output: {
-		file: getPathSpec(basePath, pkg.typings),
-		// format: 'es'
-		format: 'commonjs'
-	},
-	plugins: [dts()]
+		},
+		extensions
+	})
+];
+
+// 基础 TS文件 配置
+const baseConfTs = {
+	// 入口文件
+	input: getPathSpec(basePath, 'src/index.ts'),
+	plugins,
+	// // 作用：指出应将哪些模块视为外部模块，否则会被打包进最终的代码里
+	external: []
+};
+
+const outputConf = [{
+	// 通用模块使用
+	file: pkg.main,
+	format: 'umd'
+}, {
+	// ES模块使用
+	file: pkg.module,
+	format: 'es'
 }];
+
+const TsConf = outputConf.map(v => {
+	if (isProd) {
+		baseConfTs.plugins.push(terser());
+		v.banner = banner;
+	}
+	return Object.assign({}, baseConfTs, {
+		output: {
+			name: 'tmindSvr',
+			...v
+		}
+	});
+});
+
+export default TsConf;
