@@ -1,14 +1,20 @@
-// import KoaSvr from './core/koaSvr';
-// import DbSvr from './core/dbSvr';
-// const KoaSvr = require('./core/koaSvr/index');
-const KoaSvr = require('./core/koaSvr');
-const DbSvr = require('./core/dbSvr');
+// // import KoaSvr from './core/koaSvr';
+// // import DbSvr from './core/dbSvr';
+// // const KoaSvr = require('./core/koaSvr/index');
+// const KoaSvr = require('./core/koaSvr');
+// const DbSvr = require('./core/dbSvr');
 
-// module.exports = {
-// 	KoaSvr
+// // module.exports = {
+// // 	KoaSvr
+// // };
+
+// export default {
+// 	KoaSvr,
+// 	DbSvr
 // };
 
-export default {
-	KoaSvr,
-	DbSvr
+const func = (val: string) => {
+	return val;
 };
+
+module.exports = func;

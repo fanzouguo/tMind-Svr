@@ -1,6 +1,6 @@
 {
   "name": "tmind-svr",
-  "version": "1.0.6",
+  "version": "1.0.7",
   "description": "The server class for tframe V9 of smpoo soft comporation.",
   "private": false,
   "main": "lib/inidex.js",
@@ -102,5 +102,5 @@
     "typescript": "~3.9.3"
   },
   "createAt": "2021-03-13 07:02:42.668",
-  "lastBuild": "2021-08-08 05:53:22.434"
+  "lastBuild": "2021-08-08 06:20:37.301"
 }
