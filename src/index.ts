@@ -13,8 +13,6 @@
 // 	DbSvr
 // };
 
-const func = (val: string) => {
-	return val;
-};
+const func = require('./test/cc.ts');
 
 module.exports = func;
