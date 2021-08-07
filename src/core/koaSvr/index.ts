@@ -1,6 +1,6 @@
 import type * as KoaApp from 'koa';
-// const BaseSvr = require('../base/index');
-import BaseSvr from '../base/index';
+const BaseSvr = require('../base/index');
+// import BaseSvr from '../base/index';
 const Koa =require('koa');
 
 class KoaSvr extends BaseSvr {
@@ -22,5 +22,5 @@ class KoaSvr extends BaseSvr {
 	}
 }
 
-// module.exports = KoaSvr;
-export default KoaSvr;
+module.exports = KoaSvr;
+// export default KoaSvr;

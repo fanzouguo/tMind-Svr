@@ -1,6 +1,6 @@
 {
   "name": "tmind-svr",
-  "version": "1.0.5",
+  "version": "1.0.6",
   "description": "The server class for tframe V9 of smpoo soft comporation.",
   "private": false,
   "main": "lib/inidex.js",
@@ -16,6 +16,7 @@
     "dev": "nodemon --config ./nodemon.json -w src/**/*.ts -x \"ts-node -r tsconfig-paths/register --files\" ./src/app.ts",
     "dev:debug": "nodemon --config ./nodemon.json --inspect-brk ./src/app.ts",
     "build": "yarn clean && node ./.debug/preBuild.js && cross-env NODE_ENV=prod  yarn pkg && node ./.debug/postBuild.js",
+    "try": "node ./example/app.js",
     "lint": "eslint . --ext .js"
   },
   "repository": {
@@ -101,5 +102,5 @@
     "typescript": "~3.9.3"
   },
   "createAt": "2021-03-13 07:02:42.668",
-  "lastBuild": "2021-08-08 05:09:19.223"
+  "lastBuild": "2021-08-08 05:53:22.434"
 }

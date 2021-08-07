@@ -1,6 +1,12 @@
-require('@babel/register')({
-	presets: ['@babel/preset-env'],
-	plugins: ['@babel/plugin-transform-runtime']
-});
+/* eslint-disable no-console */
+// require('@babel/register')({
+// 	presets: ['@babel/preset-env'],
+// 	plugins: ['@babel/plugin-transform-runtime']
+// });
+import * as tmindSvr from '../lib/index.esm';
+// const { KoaSvr } = require('../lib/inidex');
+const { KoaSvr } = tmindSvr.default;
 
-const app = require('../lib/app'); // eslint-disable-line
+const app = new KoaSvr(__dirname);
+
+console.log(app);

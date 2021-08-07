@@ -12,12 +12,8 @@ const pathUser = process.env.HOME || process.env.USERPROFILE || '';
 
 const echoLine = () => console.log('\n----------------------------------------------------------------------------\n');
 
-const frm = (str, len = 2) => {
-	return `${str}`.padStart(len, '0');
-};
-
 const getGitCmd = (memo, pkg, tagThis = false, branch = 'main') => {
-	const urlStr = (pkg && pkg.repository && (pkg.repository.url || '')) || '';
+	const urlStr = pkg?.repository?.url || '';
 	const _arr = ['git add .'];
 
 	if (tagThis) {
