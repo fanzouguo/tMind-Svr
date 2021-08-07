@@ -36,10 +36,13 @@ const resetVer = (async () => {
 		if (k === _offset) {
 			v = parseInt(v) + 1;
 			return v;
+		} else if (k > _offset) {
+			return '0';
 		} else {
 			return v || '0';
 		}
 	});
+
 	pkg.version = _arr.join('.');
 	pkg.lastBuild = tDate().format('YYYY-MM-DD hh:mi:ss.ms');
 	fs.writeFileSync(path.resolve(process.cwd(), 'package.json'), JSON.stringify(pkg, null, 2));
