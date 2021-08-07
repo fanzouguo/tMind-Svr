@@ -160,4 +160,3 @@ class SvrBase extends EventEmitter implements Isvr {
 }
 
 module.exports = SvrBase;
-// export default SvrBase;
