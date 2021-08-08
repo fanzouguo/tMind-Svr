@@ -329,4 +329,7 @@ export declare class Isvr {
 	async http(url: string, opt?: IsvrRequestOption): Promise<any>;
 }
 
+export declare function func1(): void;
+export declare function func2(): void;
+
 export { };
