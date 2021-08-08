@@ -1,10 +1,9 @@
 /build/
 /dist/
 /*.dts
+/src/assets/
 /public/
 /0_tobeDel/
-/lib/
-/dist/
-./package.json
-**/*/*.d.ts
 /node_modules/
+/lib*/
+.*

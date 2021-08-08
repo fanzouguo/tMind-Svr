@@ -1,9 +1,5 @@
-const KoaSvr = require('./core/koaSvr');
-const DbSvr = require('./core/dbSvr');
+import { tDate } from 'tmind-core';
 
-module.exports = {
-	KoaSvr,
-	DbSvr
+export const test = () => {
+	return tDate().format();
 };
-
-export {};
