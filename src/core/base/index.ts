@@ -3,16 +3,16 @@ import type { MSG_TYPE, IObj } from 'tmind-core';
 import { tEcho } from 'tmind-core';
 import Terr from '../../class/Terr';
 import { ERR_TYPE } from '../../enum';
+import preConf from './preConf';
+import PathMgr from './PathMgr';
+import bootWelcome from './bootWelcome';
 const EventEmitter = require('events');
-const PathMgr = require('./PathMgr');
-const preConf = require('./preConf');
-const bootWelcome = require('./bootWelcome');
 const rq = require('request-promise');
 
 class SvrBase extends EventEmitter implements Isvr {
 	#ident: string;
 	#pathMgr: TpathMgr;
-	#config: IconfSvr;
+	#config: IconfSvr | IObj<any>;
 	// 是否处于暂停状态
 	#isPause: boolean;
 	// 是否采用了 SSL 协议

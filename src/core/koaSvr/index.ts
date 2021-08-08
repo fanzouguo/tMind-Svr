@@ -1,5 +1,6 @@
 import type * as KoaApp from 'koa';
-const BaseSvr = require('../base/index');
+import BaseSvr from '../base/index';
+// const BaseSvr = require('../base/index');
 const Koa =require('koa');
 
 class KoaSvr extends BaseSvr {

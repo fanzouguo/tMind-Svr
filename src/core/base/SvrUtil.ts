@@ -1,8 +1,8 @@
 import type { IipInfo } from '../../types';
-const { tEcho } = require('tmind-core');
+import { tEcho } from 'tmind-core';
+import PathMgr from './PathMgr';
 const os = require('os');
 const fs = require('fs-extra');
-const PathMgr = require('./PathMgr');
 const iconv = require('iconv-lite');
 const childProcess = require('child_process');
 
@@ -206,8 +206,8 @@ class SvrUtil {
 			];
 			this.execCmd(true, ...cmdArr);
 		} catch (err) {
-			tEcho('SSL文件构造失败，详情如下：', '失败', 'err');
-			tEcho(err, '', 'err');
+			tEcho('SSL文件构造失败，详情如下：', '失败', 'ERR');
+			tEcho(err, '', 'ERR');
 		}
 	}
 }

@@ -1,5 +1,5 @@
 import { tEcho, tDate, smpoo } from 'tmind-core';
-const SvrUtil = require('./SvrUtil');
+import SvrUtil from './SvrUtil';
 
 /** 服务实例启动欢迎语
  * @param isSSL SSL 类型（HTTP/HTTPS）

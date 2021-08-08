@@ -1,4 +1,4 @@
-const { tEcho } = require('tmind-core');
+import { tEcho } from 'tmind-core';
 
 /** 终止服务启动
  * @param msg 控制台回显信息

@@ -1,6 +1,6 @@
 import type * as KoaApp from 'koa';
 import type { IconfSvr, IconfUnit, Logger as TLogger, PathMgr as TPathMgr, Isvr, TimeTask as TtimeTask } from '../../@types';
-const { tDate, tEcho } = require('tmind-core');
+import { tDate, tEcho } from 'tmind-core';
 const Koa = require('koa');
 const http2 = require('http2');
 const koaCors = require('koa2-cors');
@@ -187,7 +187,7 @@ class Svr extends Koa implements Isvr {
 			if (this.#conf.cert.key) {
 				const server = http2.createSecureServer(this.#conf.cert, this.#app.callback());
 				server.listen(_portVal_, (err: Error) => {
-					tEcho(err, '启动失败', 'err');
+					tEcho(err, '启动失败', 'ERR');
 				});
 				svrMode = '/S';
 			} else {
@@ -196,7 +196,7 @@ class Svr extends Koa implements Isvr {
 			this.#timeTask.start();
 			bootWelcome(svrMode, _portVal_);
 		} else {
-			tEcho('启动失败', '异常', 'err');
+			tEcho('启动失败', '异常', 'ERR');
 			terminat('启动失败');
 		}
 	}

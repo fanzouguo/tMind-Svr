@@ -1,5 +1,5 @@
 import type { Context, Next } from 'koa';
-const { tDate } = require('tmind-core');
+import { tDate } from 'tmind-core';
 
 const bootTask = () => {
 	return async (ctx: Context, next: Next) => {
