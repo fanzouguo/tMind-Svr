@@ -1,6 +1,7 @@
 import type { ParsedPath } from 'path';
 import type { IObj, MSG_TYPE } from 'tmind-core';
 import type { ERR_TYPE } from '../enum';
+import type * as KoaApp from 'koa';
 
 declare namespace tmindSvr {
 	export declare type pathType = 'conf' | 'logs' | 'script' | 'cert' | 'license' | 'router' | 'task' | 'any';
@@ -278,7 +279,6 @@ declare module tmindSvr {
 		/** 初始化构造
 		 *
 		 * @param appDir 引用该类的 app 主程序路径（__dirname)
-		 * @param shareApp 共享的 app 实例
 		 */
 		constructor(appDir: string);
 		/** 获取服务实例的路径信息集合
@@ -331,6 +331,29 @@ declare module tmindSvr {
 		 * @param opt HTTP 请求配置对象
 		 */
 		async http(url: string, opt?: tmindSvr.IsvrRequestOption): Promise<any>;
+	}
+
+	/** 基于 KOA 的nodejs服务端
+	 *
+	 */
+	export declare class KoaSvr extends Isvr {
+		/** 初始化构造
+		 *
+		 * @param appDir 引用该类的 app 主程序路径（__dirname)
+		 */
+		constructor(appDir: string);
+		get app(): KoaApp;
+	}
+
+	/** 面向 DB 互操作的服务端
+	 *
+	 */
+	export declare class DbSvr extends Isvr {
+		/** 初始化构造
+		 *
+		 * @param appDir 引用该类的 app 主程序路径（__dirname)
+		 */
+		constructor(appDir: string);
 	}
 }
 
