@@ -1,7 +1,8 @@
 // export const KoaSvr = require('./core/koaSvr');
 // export const DbSvr = require('./core/dbSvr');
 // const func = require('./testA/foo');
-import func from './testA/foo';
+// import func from './testA/foo';
+const func = require('./testA/foo');
 const _func2 = () => {
 	return 'test function';
 };
