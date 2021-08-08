@@ -11,7 +11,7 @@ const { getPathSpec } = require('./.debug/getPath');
 const getDate = require('./.debug/getDate');
 const basePath = process.cwd();
 const banner = `/*!
-* tMind-svr v${pkg.version}
+* tMind-Svr v${pkg.version}
 * (c) 2021-2022  Smpoo soft Co. Shanghai China
 * Released under the MIT License.
 * Author: David
@@ -75,7 +75,7 @@ const TsConf = outputConf.map(v => {
 	}
 	return Object.assign({}, baseConfTs, {
 		output: {
-			name: 'tmind',
+			name: 'tmindSvr',
 			...v
 		}
 	});
