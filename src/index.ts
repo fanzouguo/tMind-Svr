@@ -1,5 +1,2 @@
-import { tDate } from 'tmind-core';
-
-export const test = () => {
-	return tDate().format();
-};
+export const KoaSvr = require('./core/koaSvr');
+export const DbSvr = require('./core/dbSvr');
