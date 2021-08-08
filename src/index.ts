@@ -1,9 +1,9 @@
-import KoaSvr from'./core/koaSvr';
-import DbSvr from './core/dbSvr';
+import KoaSvrClass from'./core/koaSvr';
+import DbSvrClass from './core/dbSvr';
 
-// export const KoaSvr = KoaSvr;
-// export const DbSvr = DbSvr;
-export default {
-	KoaSvr,
-	DbSvr
-};
+export const KoaSvr = KoaSvrClass;
+export const DbSvr = DbSvrClass;
+// export default {
+// 	KoaSvr,
+// 	DbSvr
+// };
