@@ -159,4 +159,4 @@ class SvrBase extends EventEmitter implements Isvr {
 	// 异常处理
 }
 
-module.exports = SvrBase;
+export default SvrBase;

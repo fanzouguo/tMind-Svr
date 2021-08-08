@@ -21,4 +21,4 @@ class KoaSvr extends BaseSvr {
 	}
 }
 
-module.exports = KoaSvr;
+export default KoaSvr;

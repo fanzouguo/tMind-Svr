@@ -13,4 +13,4 @@ const bootTask = () => {
 };
 
 
-module.exports = bootTask;
+export default bootTask;

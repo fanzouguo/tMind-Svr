@@ -149,4 +149,4 @@ class PathMgr implements TpathMgr {
 	}
 }
 
-module.exports = PathMgr;
+export default PathMgr;

@@ -6,4 +6,4 @@ class DbSvr extends BaseSvr {
 	}
 }
 
-module.exports = DbSvr;
+export default DbSvr;

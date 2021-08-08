@@ -5,7 +5,7 @@ const SvrUtil = require('./SvrUtil');
  * @param isSSL SSL 类型（HTTP/HTTPS）
  * @param port 服务监听端口
  */
-module.exports = (isSSL: boolean, port: number, svrName?: string) => {
+export default (isSSL: boolean, port: number, svrName?: string) => {
 	const { appCopy, consoleStr } = smpoo();
 	// @ts-ignore
 	tEcho(consoleStr(), '', 'INFO');

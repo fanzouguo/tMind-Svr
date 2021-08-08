@@ -48,7 +48,7 @@ const getUintConf = (): IconfUnit => {
 
 /** 初始化服务配置清单
  */
-module.exports = (currPath: PathMgr): IconfSvr => {
+export default (currPath: PathMgr): IconfSvr => {
 	try {
 		const rootPath = currPath.getPath('conf');
 		const _arr: string[] = fs.readdirSync(rootPath);

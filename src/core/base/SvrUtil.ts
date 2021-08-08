@@ -212,5 +212,4 @@ class SvrUtil {
 	}
 }
 
-module.exports = SvrUtil;
-export {};
+export default SvrUtil;
