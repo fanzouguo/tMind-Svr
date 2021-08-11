@@ -56,18 +56,18 @@ const baseConfTs = {
 	plugins,
 	// // 作用：指出应将哪些模块视为外部模块，否则会被打包进最终的代码里
 	external: [
-		'os',
-		'pg',
-		'ws',
-		'koa',
-		'path',
+		'child_process',
 		'fs-extra',
 		'glob-all',
 		'iconv-lite',
-		'tmind-core',
+		'koa',
 		'node-json-db',
 		'node-schedule',
-		'child_process'
+		'os',
+		'path',
+		'pg',
+		'tmind-core',
+		'ws'
 	]
 };
 
@@ -83,7 +83,7 @@ const outputConf = [{
 
 const TsConf = outputConf.map(v => {
 	if (isProd) {
-		baseConfTs.plugins.push(terser());
+		// baseConfTs.plugins.push(terser());
 		v.banner = banner;
 	}
 	return Object.assign({}, baseConfTs, {
