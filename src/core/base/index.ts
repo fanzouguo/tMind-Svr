@@ -7,7 +7,7 @@ import type { Isvr,
 	Terr,
 	TimeTask as TtimeTask
 } from '../../types';
-import type { MSG_TYPE } from 'tmind-core';
+import type { MSG_TYPE, IObj } from 'tmind-core';
 import { tEcho, tDate, smpoo } from 'tmind-core';
 import { INFO_TYPE, WARN_TYPE, ERR_TYPE } from '../../types';
 import preConf from './preConf';
@@ -33,7 +33,7 @@ class SvrBase extends EventEmitter implements Isvr {
 	constructor(appDir: string) {
 		super();
 		this.pathMgr = new PathMgr(appDir);
-		this.ident = this.pathMgr.svrForlder;
+		this.ident = this.pathMgr.svrForlder.replace(/Svr/, '');
 		this.configAll = preConf(this.pathMgr);
 		this.config = this.configAll.unit[this.ident];
 		this.#TimeTask = new TimeTask(this.pathMgr, this.configAll);
@@ -47,11 +47,24 @@ class SvrBase extends EventEmitter implements Isvr {
 			this.echo(err);
 		});
 
+		process.on('uncaughtException', (err: Error) => {
+			this.echo('监听到异常，详情如下：', '未捕获的异常', 'ERR');
+			this.echo(err);
+		});
+
+		process.on('unhandledRejection', (err: Error) => {
+			this.echo('监听到异常，详情如下：', '未捕获的Reject', 'ERR');
+			this.echo(err);
+		});
+
 		this.#logger = new WebSocket(this.configAll.loggerUrl);
 		this.#logger.on('close', () => {
 			this.exit('日志服务已终止，本服务也将随之终止.');
 		});
-		this.#logger.on('error', () => {
+		this.#logger.on('error', (err: IObj<any>) => {
+			if (err.code === 'ECONNREFUSED') {
+				this.exit('由于日志服务连接失败，服务终止了启动');
+			}
 			this.exit('日志写入失败，本服务也将随之终止.');
 		});
 	}
@@ -219,7 +232,7 @@ class SvrBase extends EventEmitter implements Isvr {
 			tEcho(`物理IP：${SvrUtil.getSvrIp().Main}`, '', 'INFO');
 			tEcho(`配置指向：${this.addr}`, '', 'INFO');
 			const _svrNameStr = !this.config.namezh ? '' : `[${this.config.namezh}]`;
-			tEcho(`${_svrNameStr}服务端已启动......\n\n    Enjoy it!\n\n`, `HTTP${this.onSSL ? '/s' : ''}：${this.port}`, 'SUCC');
+			tEcho(`${_svrNameStr}服务端已启动......\n\n    Enjoy it!\n\n`, `HTTP${this.onSSL ? '/s' : ''}：${this.config.port}`, 'SUCC');
 		} catch (err) {
 			this.echo((err as Error).message, '启动失败');
 			this.echo(err);

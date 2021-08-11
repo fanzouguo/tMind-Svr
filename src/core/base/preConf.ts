@@ -94,7 +94,7 @@ export default (currPath: PathMgr): IconfSvr | never => {
 						const _objUnit = getUintConf();
 						const { id, ident, namezh, memo, addr, port, prefix, corsed, appendCorsHeader, disableMethods, corsWhiteList, schedule, linkToDb, ...otherConf } = objFile;
 						_objUnit.id = (!id || tempObj[`${id}`]) ? i : parseInt(objFile.id);
-						_objUnit.ident = v.replace(/Conf.js/g, '');
+						_objUnit.ident = v.replace(/Conf.js/g, '').replace(/^\./, '');
 						_objUnit.namezh = namezh;
 						_objUnit.memo = memo;
 						_objUnit.addr = addr.map((v: string) => v || 'localhost')[_obj.isDev ? 0 : 1];

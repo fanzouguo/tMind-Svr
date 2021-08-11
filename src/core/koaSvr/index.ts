@@ -21,7 +21,7 @@ class KoaSvr extends BaseSvr implements KoaSvrClass {
 	}
 
 	start() {
-		this.#app.listen(super.config.port);
+		this.#app.listen(this.config.port);
 		super.start();
 	}
 }
