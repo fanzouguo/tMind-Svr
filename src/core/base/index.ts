@@ -32,7 +32,7 @@ class SvrBase extends EventEmitter implements Isvr {
 	// 是否处于暂停状态
 	#isPause: boolean;
 	#timTaskStoped: boolean;
-	#logger: WebSocket;
+	#logger?: WebSocket;
 	constructor(appDir: string) {
 		super();
 		this.showLog = false;
@@ -67,19 +67,22 @@ class SvrBase extends EventEmitter implements Isvr {
 			this.setErr(err, ERR_TYPE.Svr_UnHandled_Reject, -1, '未捕获的Reject');
 		});
 
-		this.#logger = new WebSocket(this.configAll.loggerUrl);
-		this.#logger.on('open', () => {
-			this.setLogInfo('日志服务已连接', INFO_TYPE.Svr_Boot, -1, 'boot');
-		});
-		this.#logger.on('close', () => {
-			this.exit('日志服务已终止，本服务也将随之终止.');
-		});
-		this.#logger.on('error', (err: IObj<any>) => {
-			if (err.code === 'ECONNREFUSED') {
-				this.exit('由于日志服务连接失败，服务终止了启动');
-			}
-			this.exit('日志写入失败，本服务也将随之终止.');
-		});
+		// 建立与日志服务器的连接
+		if (this.ident !== 'log') {
+			this.#logger = new WebSocket(this.configAll.loggerUrl);
+			this.#logger.on('open', () => {
+				this.setLogInfo('日志服务已连接', INFO_TYPE.Svr_Boot, -1, 'boot');
+			});
+			this.#logger.on('close', () => {
+				this.exit('日志服务已终止，本服务也将随之终止.');
+			});
+			this.#logger.on('error', (err: IObj<any>) => {
+				if (err.code === 'ECONNREFUSED') {
+					this.exit('由于日志服务连接失败，服务终止了启动');
+				}
+				this.exit('日志写入失败，本服务也将随之终止.');
+			});
+		}
 	}
 
 	get paused(): boolean {
@@ -102,29 +105,33 @@ class SvrBase extends EventEmitter implements Isvr {
 	 * @param title 控制台显示时采用的标题
 	 */
 	setInfo(msg: any, currLogType: INFO_TYPE, reqId?: number, tag?: string, title?: string, msgType: MSG_TYPE = 'INFO') {
-		if (msgType === 'INFO' || msgType === 'SUCC') {
-			if (this.#logger) {
-				const _infoObj: IsvrLog = {
-					logId: reqId || -1,
-					from: this.config.namezh,
-					tag: tag || '',
-					name: '',
-					message: msg,
-					type: msgType,
-					level: currLogType || INFO_TYPE.Normal_Info
-				};
+		if (this.ident !== 'log') {
+			if (msgType === 'INFO' || msgType === 'SUCC') {
+				if (this.#logger) {
+					const _infoObj: IsvrLog = {
+						logId: reqId || -1,
+						from: this.config.namezh,
+						tag: tag || '',
+						name: '',
+						message: msg,
+						type: msgType,
+						level: currLogType || INFO_TYPE.Normal_Info
+					};
 
-				this.#logger.send(JSON.stringify(_infoObj), (err: Error | undefined) => {
-					if (err) {
-						this.exit('日志写入失败，服务已终止，请确保日志服务运行正常');
+					this.#logger.send(JSON.stringify(_infoObj), (err: Error | undefined) => {
+						if (err) {
+							this.exit('日志写入失败，服务已终止，请确保日志服务运行正常');
+						}
+					});
+					if (this.showLog) {
+						tEcho(msg, title || '信息', msgType);
 					}
-				});
-				if (this.showLog) {
-					tEcho(msg, title || '信息', msgType);
 				}
+			} else {
+				tEcho('setInfo的msgType类型取值只能为：INFO | SUCC', '代码级错误', 'ERR');
 			}
 		} else {
-			tEcho('setInfo的msgType类型取值只能为：INFO | SUCC', '代码级错误', 'ERR');
+			tEcho('日志服务器不支持 setInfo 方法', '警告！', 'WARN');
 		}
 	}
 
@@ -135,24 +142,28 @@ class SvrBase extends EventEmitter implements Isvr {
 	 * @param tag 日志标签
 	 */
 	setWarn(msg: any, currLogType: WARN_TYPE, reqId?: number, tag?: string) {
-		if (this.#logger) {
-			const _warnObj: IsvrLog = {
-				logId: reqId || -1,
-				from: this.config.namezh,
-				tag: tag || '',
-				name: '',
-				message: msg,
-				type: 'WARN',
-				level: currLogType || WARN_TYPE.Normal_Warn
-			};
-			this.#logger.send(JSON.stringify(_warnObj), (err: Error | undefined) => {
-				if (err) {
-					this.exit('日志写入失败，服务已终止，请确保日志服务运行正常');
+		if (this.ident !== 'log') {
+			if (this.#logger) {
+				const _warnObj: IsvrLog = {
+					logId: reqId || -1,
+					from: this.config.namezh,
+					tag: tag || '',
+					name: '',
+					message: msg,
+					type: 'WARN',
+					level: currLogType || WARN_TYPE.Normal_Warn
+				};
+				this.#logger.send(JSON.stringify(_warnObj), (err: Error | undefined) => {
+					if (err) {
+						this.exit('日志写入失败，服务已终止，请确保日志服务运行正常');
+					}
+				});
+				if (this.showLog) {
+					tEcho(msg, '警告', 'WARN');
 				}
-			});
-			if (this.showLog) {
-				tEcho(msg, '警告', 'WARN');
 			}
+		} else {
+			tEcho('日志服务器不支持 setWarn 方法', '警告！', 'WARN');
 		}
 	}
 
@@ -163,29 +174,33 @@ class SvrBase extends EventEmitter implements Isvr {
 	 * @param tag 日志标签
 	 */
 	setErr(err: string | Error, currLogType?: ERR_TYPE, reqId?: number, tag?: string) {
-		if (this.#logger) {
-			const isErr = err instanceof Error;
-			const _errObj: IsvrLog = {
-				logId: reqId || -1,
-				from: this.config.namezh,
-				tag: tag || '',
-				// @ts-ignore
-				code: isErr ? err.code : '',
-				name: isErr ? (err as Error).name : '',
-				message: isErr ? (err as Error).message : err as string,
-				stack: isErr ? (err as Error).stack : '',
-				type: 'ERR',
-				level: currLogType || ERR_TYPE.Unkown_ERR
-			};
-			this.#logger.send(JSON.stringify(_errObj), (err: Error | undefined) => {
-				if (err) {
-					this.exit('日志写入失败，服务已终止，请确保日志服务运行正常');
+		if (this.ident !== 'log') {
+			if (this.#logger) {
+				const isErr = err instanceof Error;
+				const _errObj: IsvrLog = {
+					logId: reqId || -1,
+					from: this.config.namezh,
+					tag: tag || '',
+					// @ts-ignore
+					code: isErr ? err.code : '',
+					name: isErr ? (err as Error).name : '',
+					message: isErr ? (err as Error).message : err as string,
+					stack: isErr ? (err as Error).stack : '',
+					type: 'ERR',
+					level: currLogType || ERR_TYPE.Unkown_ERR
+				};
+				this.#logger.send(JSON.stringify(_errObj), (err: Error | undefined) => {
+					if (err) {
+						this.exit('日志写入失败，服务已终止，请确保日志服务运行正常');
+					}
+				});
+				this.emit('error', _errObj);
+				if (this.showLog) {
+					tEcho(_errObj, `${tag || ''}异常`, 'ERR');
 				}
-			});
-			this.emit('error', _errObj);
-			if (this.showLog) {
-				tEcho(_errObj, `${tag || ''}异常`, 'ERR');
 			}
+		} else {
+			tEcho('日志服务器不支持 setErr 方法', '警告！', 'WARN');
 		}
 	}
 
