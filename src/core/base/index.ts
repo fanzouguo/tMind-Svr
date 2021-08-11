@@ -71,7 +71,7 @@ class SvrBase extends EventEmitter implements Isvr {
 		if (this.ident !== 'log') {
 			this.#logger = new WebSocket(this.configAll.loggerUrl);
 			this.#logger.on('open', () => {
-				this.setLogInfo('日志服务已连接', INFO_TYPE.Svr_Boot, -1, 'boot');
+				this.setInfo('日志服务已连接', INFO_TYPE.Svr_Boot, -1, 'boot');
 			});
 			this.#logger.on('close', () => {
 				this.exit('日志服务已终止，本服务也将随之终止.');
@@ -237,7 +237,7 @@ class SvrBase extends EventEmitter implements Isvr {
 		try {
 			return await rq(_obj);
 		} catch (err) {
-			this.preErr(err, ERR_TYPE.Svr_Http_Request_Err);
+			this.setErr(err, ERR_TYPE.Svr_Http_Request_Err, -1, 'Svr Http');
 		}
 	}
 
