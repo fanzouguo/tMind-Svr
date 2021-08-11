@@ -4,8 +4,8 @@ import type { Isvr,
 	IconfUnit,
 	IsvrRequestOption,
 	httpMethod,
-	Terr,
-	TimeTask as TtimeTask
+	TimeTask as TtimeTask,
+	IsvrLog
 } from '../../types';
 import type { MSG_TYPE, IObj } from 'tmind-core';
 import { tEcho, tDate, smpoo } from 'tmind-core';
@@ -25,6 +25,9 @@ class SvrBase extends EventEmitter implements Isvr {
 	readonly config: IconfUnit;
 	readonly configAll: IconfSvr;
 	readonly onSSL: boolean;
+	/** 在终端控制台实时显示日志输出
+	 */
+	public showLog: boolean;
 	#TimeTask: TtimeTask;
 	// 是否处于暂停状态
 	#isPause: boolean;
@@ -32,6 +35,7 @@ class SvrBase extends EventEmitter implements Isvr {
 	#logger: WebSocket;
 	constructor(appDir: string) {
 		super();
+		this.showLog = false;
 		this.pathMgr = new PathMgr(appDir);
 		this.ident = this.pathMgr.svrForlder.replace(/Svr/, '');
 		this.configAll = preConf(this.pathMgr);
@@ -41,25 +45,31 @@ class SvrBase extends EventEmitter implements Isvr {
 		this.onSSL = !!(this.configAll.cert.key);
 		this.#timTaskStoped = false;
 
+		process.on('SIGINT', (e: any) => {
+			const msg = `${this.config.namezh}服务已被强制终止`;
+			if (this.config.ident !== 'log') {
+				this.setWarn(msg, WARN_TYPE.Svr_Stoped, -1, 'stop');
+			}
+			tEcho(msg, '警告！', 'WARN');
+			process.exit(0);
+		});
+
 		// 非请求响应的异常处理
 		this.on('error', (err: Error) => {
-			this.echo('监听到异常，详情如下：', '错误', 'ERR');
-			this.echo(err);
+			this.setErr(err, ERR_TYPE.Svr_Catch_Err, -1, '监听到异常');
 		});
 
 		process.on('uncaughtException', (err: Error) => {
-			this.echo('监听到异常，详情如下：', '未捕获的异常', 'ERR');
-			this.echo(err);
+			this.setErr(err, ERR_TYPE.Svr_UnCatch_Err, -1, '未捕获的异常');
 		});
 
 		process.on('unhandledRejection', (err: Error) => {
-			this.echo('监听到异常，详情如下：', '未捕获的Reject', 'ERR');
-			this.echo(err);
+			this.setErr(err, ERR_TYPE.Svr_UnHandled_Reject, -1, '未捕获的Reject');
 		});
 
 		this.#logger = new WebSocket(this.configAll.loggerUrl);
 		this.#logger.on('open', () => {
-			this.setLog('INFO', `[${this.config.namezh}]服务已启动`, INFO_TYPE.Svr_Boot, -1, '启动');
+			this.setLogInfo('日志服务已连接', INFO_TYPE.Svr_Boot, -1, 'boot');
 		});
 		this.#logger.on('close', () => {
 			this.exit('日志服务已终止，本服务也将随之终止.');
@@ -76,111 +86,106 @@ class SvrBase extends EventEmitter implements Isvr {
 		return this.#isPause;
 	}
 
-	get addr(): string {
-		return (this.config.addr || this.configAll.addr)[this.configAll.isDev ? 0 : 1];
-	}
-
-	get port(): number {
-		return this.config.port;
-	}
-
 	/** 为服务端实例预置定时任务
 	 *
 	 * @param taskUnit 定时任务集合
 	 */
-	setTimeTask(...taskUnit: void[] | void[][]) {
+	setTimeTask(...taskUnit: any[]) {
 		this.#TimeTask.prepare(...taskUnit);
 	}
 
-	/** 输出服务端控制台回显
-	 *
-	 * @param msg 要显示的信息正文
-	 * @param title 要显示的标题名称
-	 * @param msgType 要显示的信息类型
+	/** 创建INFO类日志
+	 * @param msg 要写入日志的信息文本
+	 * @param currLogType 当前日志信息的自定义类型
+	 * @param reqId 触发该日志的请求ID
+	 * @param tag 日志标签
+	 * @param title 控制台显示时采用的标题
 	 */
-	echo(msg: any, title?: string, msgType?: MSG_TYPE): void {
-		const isErr = msg instanceof Error;
-		if (!title) {
-			if (isErr) {
-				console.error(msg); // eslint-disable-line
-			} else {
-				console.log(msg); // eslint-disable-line
+	setInfo(msg: any, currLogType: INFO_TYPE, reqId?: number, tag?: string, title?: string, msgType: MSG_TYPE = 'INFO') {
+		if (msgType === 'INFO' || msgType === 'SUCC') {
+			if (this.#logger) {
+				const _infoObj: IsvrLog = {
+					logId: reqId || -1,
+					from: this.config.namezh,
+					tag: tag || '',
+					name: '',
+					message: msg,
+					type: msgType,
+					level: currLogType || INFO_TYPE.Normal_Info
+				};
+
+				this.#logger.send(JSON.stringify(_infoObj), (err: Error | undefined) => {
+					if (err) {
+						this.exit('日志写入失败，服务已终止，请确保日志服务运行正常');
+					}
+				});
+				if (this.showLog) {
+					tEcho(msg, title || '信息', msgType);
+				}
 			}
 		} else {
-			tEcho(msg, title, msgType);
+			tEcho('setInfo的msgType类型取值只能为：INFO | SUCC', '代码级错误', 'ERR');
 		}
 	}
 
-	/** 异常处理器
-	 *
-	 * @param msg 异常信息文本
+	/** 创建WARN类日志
+	 * @param msg 要写入日志的信息文本
+	 * @param currLogType 当前日志信息的自定义类型
+	 * @param reqId 触发该日志的请求ID
+	 * @param tag 日志标签
 	 */
-	preErr(msg: string): void;
-	/** 异常处理器
-	 *
-	 * @param err JS/TS的 Error 对象
-	 */
-	preErr(err: Error): void;
-	/** 异常处理器
-	 *
-	 * @param msg 异常信息文本
-	 * @param errCode 基于 tFrameV9平台定义的错误码
-	 */
-	preErr(msg: string, errCode: ERR_TYPE): void;
-	/** 异常处理器
-	 *
-	 * @param err JS/TS的 Error 对象
-	 * @param errCode 基于 tFrameV9平台定义的错误码
-	 */
-	preErr(err: Error, errCode: ERR_TYPE): void;
-	/** 异常处理器
-	 *
-	 * @param msg 异常信息文本
-	 * @param errCode 基于 tFrameV9平台定义的错误码
-	 * @param toConsole 是否输出到控制台
-	 */
-	preErr(msg: string, errCode: ERR_TYPE, toConsole: boolean): void;
-	/** 异常处理器
-	 *
-	 * @param err JS/TS的 Error 对象
-	 * @param errCode 基于 tFrameV9平台定义的错误码
-	 * @param toConsole 是否输出到控制台
-	 */
-	preErr(err: Error, errCode: ERR_TYPE, toConsole: boolean): void;
-	preErr(a: string | Error, b?: ERR_TYPE | boolean, c?: boolean): void {
-		const _errObj: Terr = (((typeof a === 'string') && new Error(a)) || a) as Terr;
-		const isBoolB = typeof b === 'boolean';
-		if (b) {
-			_errObj.code = !isBoolB ? (b as ERR_TYPE) : ERR_TYPE.Unkown_ERR;
-		} else {
-			_errObj.code = ERR_TYPE.Unkown_ERR;
-		}
-		if (isBoolB || c) {
-			tEcho(typeof a === 'string' ? a : (a as Error).message, '异常', 'ERR');
-		}
-		this.emit('error', _errObj);
-	}
-
-	/** 创建日志
-	 * @param msgType 日志消息或
-	 * @param msg 日志消息或
-	 * @param currLogType 日志消息或
-	 * @param reqId 日志消息或
-	 * @param tag 日志消息或
-	 */
-	setLog(msgType: MSG_TYPE, msg: string | Error, currLogType: INFO_TYPE | WARN_TYPE | ERR_TYPE, reqId?: number, tag?: string) {
+	setWarn(msg: any, currLogType: WARN_TYPE, reqId?: number, tag?: string) {
 		if (this.#logger) {
-			this.#logger.send(JSON.stringify({
-				msgType,
-				msg,
-				currLogType,
-				reqId: reqId || -1,
-				tag
-			}), (err: Error | undefined) => {
+			const _warnObj: IsvrLog = {
+				logId: reqId || -1,
+				from: this.config.namezh,
+				tag: tag || '',
+				name: '',
+				message: msg,
+				type: 'WARN',
+				level: currLogType || WARN_TYPE.Normal_Warn
+			};
+			this.#logger.send(JSON.stringify(_warnObj), (err: Error | undefined) => {
 				if (err) {
 					this.exit('日志写入失败，服务已终止，请确保日志服务运行正常');
 				}
 			});
+			if (this.showLog) {
+				tEcho(msg, '警告', 'WARN');
+			}
+		}
+	}
+
+	/** 创建ERR类日志
+	 * @param msg 要写入日志的信息文本
+	 * @param currLogType 当前日志信息的自定义类型
+	 * @param reqId 触发该日志的请求ID
+	 * @param tag 日志标签
+	 */
+	setErr(err: string | Error, currLogType?: ERR_TYPE, reqId?: number, tag?: string) {
+		if (this.#logger) {
+			const isErr = err instanceof Error;
+			const _errObj: IsvrLog = {
+				logId: reqId || -1,
+				from: this.config.namezh,
+				tag: tag || '',
+				// @ts-ignore
+				code: isErr ? err.code : '',
+				name: isErr ? (err as Error).name : '',
+				message: isErr ? (err as Error).message : err as string,
+				stack: isErr ? (err as Error).stack : '',
+				type: 'ERR',
+				level: currLogType || ERR_TYPE.Unkown_ERR
+			};
+			this.#logger.send(JSON.stringify(_errObj), (err: Error | undefined) => {
+				if (err) {
+					this.exit('日志写入失败，服务已终止，请确保日志服务运行正常');
+				}
+			});
+			this.emit('error', _errObj);
+			if (this.showLog) {
+				tEcho(_errObj, `${tag || ''}异常`, 'ERR');
+			}
 		}
 	}
 
@@ -235,12 +240,12 @@ class SvrBase extends EventEmitter implements Isvr {
 			tEcho('-----------------------------------------------------------', '', 'INFO');
 			tEcho(`${tDate().format('YYYY-MM-DD hh:mi:sss')}\n\n`, '', 'INFO');
 			tEcho(`物理IP：${SvrUtil.getSvrIp().Main}`, '', 'INFO');
-			tEcho(`配置指向：${this.addr}`, '', 'INFO');
+			tEcho(`配置指向：${this.config.addr}`, '', 'INFO');
 			const _svrNameStr = !this.config.namezh ? '' : `[${this.config.namezh}]`;
 			tEcho(`${_svrNameStr}服务端已启动......\n\n    Enjoy it!\n\n`, `HTTP${this.onSSL ? '/s' : ''}：${this.config.port}`, 'SUCC');
+			this.setInfo(`[${this.config.namezh}] Server is start at ${this.config.addr}:${this.config.port} in ${tDate().format('YYYY-MM-DD hh:mi:ss.ms')}`, INFO_TYPE.Svr_Boot, -1, 'boot', '', 'SUCC');
 		} catch (err) {
-			this.echo((err as Error).message, '启动失败');
-			this.echo(err);
+			tEcho(err, '启动失败', 'ERR');
 			process.exit(1);
 		}
 	}
@@ -265,7 +270,7 @@ class SvrBase extends EventEmitter implements Isvr {
 			this.#timTaskStoped = true;
 		}
 		this.#isPause = true;
-		this.echo('服务已暂停', '警告！', 'WARN');
+		tEcho('服务已暂停', '警告！', 'WARN');
 	}
 
 	/** 恢复服务
@@ -275,7 +280,7 @@ class SvrBase extends EventEmitter implements Isvr {
 			this.#TimeTask.start();
 		}
 		this.#isPause = false;
-		this.echo('服务已恢复', '信息', 'INFO');
+		tEcho('服务已恢复', '信息', 'INFO');
 	}
 
 	/** 强制终止服务端启动

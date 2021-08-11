@@ -9,33 +9,39 @@ declare namespace tmindSvr {
 
 	/* eslint-disable no-unused-vars */
 	export declare const enum INFO_TYPE {
+		/** 通用信息
+		 */
+		Normal_Info = 11000,
 		/** 服务已启动
 		 */
-		Svr_Boot = 11000,
+		Svr_Boot = 11101,
 		/** 服务已恢复
 		 */
-		Svr_Resumed = 11001,
+		Svr_Resumed = 11102,
 		/** 未标识的网络接入请求
 		 */
-		Req_In = 11101,
+		Req_In = 11201,
 		/** 输出未标识的网络请求响应
 		 */
-		Req_Out = 11102,
+		Req_Out = 11302,
 		/** 接口请求
 		 */
-		Req_Io = 11103,
+		Req_Io = 11401,
 		/** 数据库操作
 		 */
-		Exec_Db = 11103
+		Exec_Db = 11501
 	}
 
 	export declare const enum WARN_TYPE {
+		/** 通用警告
+		 */
+		Normal_Warn = 12000,
 		/** 服务已停止
 		 */
-		Svr_Stoped = 12000,
+		Svr_Stoped = 12001,
 		/** 服务已暂停
 		 */
-		Svr_Paused = 12001
+		Svr_Paused = 12002
 	}
 
 	export declare const enum ERR_TYPE {
@@ -57,6 +63,16 @@ declare namespace tmindSvr {
 		/** 服务端HTTP请求异常
 		 */
 		Svr_Http_Request_Err = 13005,
+		/** 服务端内全局捕获的异常
+		 */
+		Svr_Catch_Err = 13006,
+		/** 服务端代码内未捕获的异常
+		 */
+		Svr_UnCatch_Err = 13007,
+		/** 服务端未处理的 Reject
+		 */
+		Svr_UnHandled_Reject = 13008,
+
 		/** 数据库启动异常
 		 */
 		Db_Boot_Err = 13010,
@@ -94,30 +110,6 @@ declare namespace tmindSvr {
 		isOk?: boolean,
 		// 与 isOk 互斥，主要以 isOk 为主，isErr 仅从三方开发或接口角度的多样适配性考虑。
 		isErr?: boolean
-	}
-
-	/** 面向请求响应的异常信息格式化
-	 *
-	 */
-	export declare interface IpreErr {
-		/** 面向请求响应的异常信息格式化
-		 * @param err 异常的 Error 对象
-		 */
-		(err: Error): IResData;
-		/** 面向请求响应的异常信息格式化
-		 * @param errMsg 面向响应端输出的异常文本
-		 */
-		(errMsg: string): IResData;
-		/** 面向请求响应的异常信息格式化
-		 * @param err 异常的 Error 对象
-		 * @param code 异常码
-		 */
-		(err: Error, code: number): IResData;
-		/** 面向请求响应的异常信息格式化
-		 * @param errMsg 面向响应端输出的异常文本
-		 * @param code 异常码
-		 */
-		(errMsg: string, code: number): IResData;
 	}
 
 	/** 支持的 SSL 文件类型
@@ -249,38 +241,25 @@ declare namespace tmindSvr {
 		json?: boolean
 	}
 
-	/** 基于 tFrameV9平台定义的错误对象
-	 *
-	 */
-	export declare interface Terr extends Error {
-		/** 基于 tFrameV9平台定义的错误码
-		 *
-		 */
-		public code: ERR_TYPE;
-	}
-
 	/** 标准日志结构
 	 *
 	 */
-	export declare interface IsvrLog {
+	export declare interface IsvrLog extends Error {
 		/** 日志ID，来源为入口请求ID或服务端实例ID
 		 */
-		logId: number,
+		logId?: number,
+		/** 日志发射器来源
+		 */
+		from: string,
 		/** 日志标签
 		 */
-		tag: string,
-		/** 日志描述
-		 */
-		msg: string,
-		/** 追踪栈
-		 */
-		stack: string,
+		tag?: string,
 		/** 异常代码
 		 */
-		code: number,
+		code?: number | string,
 		/** 发生时间
 		 */
-		datatime: string,
+		datatime?: string,
 		/** 日志类型
 		 */
 		type: MSG_TYPE,
@@ -376,43 +355,6 @@ declare module tmindSvr {
 		stop()
 	}
 
-	/** 服务实例日志记录器
-	 *
-	 */
-	export declare class Logger {
-		/** 初始化
-		 *
-		 * @param currPath 日志记录器所挂载的服务实例的路径管理器
-		 * @param ident 日志记录器挂载的服务实例的标识
-		 * @param timeTasker 日志记录器挂载的服务实例的定时任务控制器
-		 */
-		constructor(currPath: PathMgr, ident: string, timeTasker: TimeTask)
-		/** 写入基本日志记录信息
-		 *
-		 * @param msg 要写入日志的信息文本
-		 * @param currLogType 当前日志信息的自定义类型
-		 * @param reqId 触发该日志的请求ID
-		 * @param tag 日志标签
-		 */
-		setInfo(msg: string, currLogType: tmindSvr.INFO_TYPE, reqId?: number, tag?: string)
-		/** 写入警告信息
-		 *
-		 * @param msg 要写入的警告信息文本
-		 * @param currLogType 当前警告信息的自定义类型
-		 * @param reqId 触发该警告信息的请求ID
-		 * @param tag 日志标签
-		 */
-		setWarn(msg: string, currLogType: tmindSvr.WARN_TYPE, reqId?: number, tag?: string)
-		/** 写入异常日志
-		 *
-		 * @param err 要写入的异常 Error 对象，或异常信息文本
-		 * @param currLogType 当前异常的自定义类型
-		 * @param reqId 触发异常的请求ID
-		 * @param tag 日志标签
-		 */
-		setErr(err: Error | string, currLogType?: tmindSvr.ERR_TYPE, reqId?: number, tag?: string)
-	}
-
 	/** 服务端实例基类
 	 */
 	export declare class Isvr {
@@ -436,6 +378,10 @@ declare module tmindSvr {
 		 */
 		readonly onSSL: boolean;
 
+		/** 在终端控制台实时显示日志输出
+		 */
+		public showLog: boolean;
+
 		/** 初始化构造
 		 *
 		 * @param appDir 引用该类的 app 主程序路径（__dirname)
@@ -446,62 +392,35 @@ declare module tmindSvr {
 		 */
 		get paused(): boolean;
 
-		/** 获取本服务实例基于配置的运行时地址指向
-		 */
-		get addr(): string;
-
-		/** 获取本服务实例基于配置的运行时端口
-		 */
-		get port(): number;
-
 		/** 为服务端实例预置定时任务
 		 * @param taskUnit 定时任务集合
 		 */
 		setTimeTask(...taskUnit: void[] | void[][]);
 
-		/** 输出服务端控制台回显
-		 * @param msg 要显示的信息正文
-		 * @param title 要显示的标题名称
-		 * @param msgType 要显示的信息类型
+		/** 创建INFO类日志
+		 * @param msg 要写入日志的信息文本
+		 * @param currLogType 当前日志信息的自定义类型
+		 * @param reqId 触发该日志的请求ID
+		 * @param tag 日志标签
+		 * @param title 控制台显示时采用的标题
 		 */
-		echo(msg: any, title?: string, msgType?: MSG_TYPE): void;
+		setInfo(msg: string | Error, currLogType: tmindSvr.INFO_TYPE, reqId?: number, tag?: string, title?: string, msgType: MSG_TYPE = 'INFO');
 
-		/** 异常处理器
-		 *
-		 * @param msg 异常信息文本
+		/** 创建WARN类日志
+		 * @param msg 要写入日志的信息文本
+		 * @param currLogType 当前日志信息的自定义类型
+		 * @param reqId 触发该日志的请求ID
+		 * @param tag 日志标签
 		 */
-		preErr(msg: string): void;
-		/** 异常处理器
-		 *
-		 * @param err JS/TS的 Error 对象
+		setWarn(msg: string | Error, currLogType: tmindSvr.WARN_TYPE, reqId?: number, tag?: string);
+
+		/** 创建ERR类日志
+		 * @param msg 要写入日志的信息文本
+		 * @param currLogType 当前日志信息的自定义类型
+		 * @param reqId 触发该日志的请求ID
+		 * @param tag 日志标签
 		 */
-		preErr(err: Error): void;
-		/** 异常处理器
-		 *
-		 * @param msg 异常信息文本
-		 * @param errCode 基于 tFrameV9平台定义的错误码
-		 */
-		preErr(msg: string, errCode: tmindSvr.ERR_TYPE): void;
-		/** 异常处理器
-		 *
-		 * @param err JS/TS的 Error 对象
-		 * @param errCode 基于 tFrameV9平台定义的错误码
-		 */
-		preErr(err: Error, errCode: tmindSvr.ERR_TYPE): void;
-		/** 异常处理器
-		 *
-		 * @param msg 异常信息文本
-		 * @param errCode 基于 tFrameV9平台定义的错误码
-		 * @param toConsole 是否输出到控制台
-		 */
-		preErr(msg: string, errCode: tmindSvr.ERR_TYPE, toConsole: boolean): void;
-		/** 异常处理器
-		 *
-		 * @param err JS/TS的 Error 对象
-		 * @param errCode 基于 tFrameV9平台定义的错误码
-		 * @param toConsole 是否输出到控制台
-		 */
-		preErr(err: Error, errCode: tmindSvr.ERR_TYPE, toConsole: boolean): void;
+		setErr(err: string | Error, currLogType?: tmindSvr.ERR_TYPE, reqId?: number, tag?: string);
 
 		/** 服务端发起远程 HTTP 协议请求器
 		 *
@@ -561,6 +480,14 @@ declare module tmindSvr {
 	 *
 	 */
 	export declare class DbSvr extends Isvr {
+		/** 初始化构造
+		 *
+		 * @param appDir 引用该类的 app 主程序路径（__dirname)
+		 */
+		constructor(appDir: string);
+	}
+
+	export declare class LogSvr extends Isvr {
 		/** 初始化构造
 		 *
 		 * @param appDir 引用该类的 app 主程序路径（__dirname)
