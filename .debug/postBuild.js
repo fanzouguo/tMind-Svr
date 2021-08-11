@@ -84,6 +84,7 @@ const pushToGithub = async () => {
 	try {
 		const _buildRoot = process.cwd();
 		await promisify(ncp)(path.resolve(_buildRoot, 'src/types'),  path.resolve(_buildRoot, 'lib/types/'));
+		// await promisify(ncp)(path.resolve(_buildRoot, 'src/core/base/subProcess'),  path.resolve(_buildRoot, 'lib/subProcess/'));
 
 		const { commitMemo } = await inquirer.prompt({
 			type: 'input',

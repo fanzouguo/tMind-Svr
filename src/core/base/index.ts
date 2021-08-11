@@ -1,51 +1,79 @@
-import type { Isvr, PathMgr as TpathMgr, IconfSvr, IconfUnit, IsvrRequestOption, httpMethod } from '../../types';
-import type { MSG_TYPE, IObj } from 'tmind-core';
-import { tEcho } from 'tmind-core';
-import Terr from '../../class/Terr';
-import { ERR_TYPE } from '../../enum';
+import type { Isvr,
+	PathMgr as TpathMgr,
+	IconfSvr,
+	IconfUnit,
+	IsvrRequestOption,
+	httpMethod,
+	Terr,
+	TimeTask as TtimeTask
+} from '../../types';
+import type { MSG_TYPE } from 'tmind-core';
+import { tEcho, tDate, smpoo } from 'tmind-core';
+import { INFO_TYPE, WARN_TYPE, ERR_TYPE } from '../../types';
 import preConf from './preConf';
 import PathMgr from './PathMgr';
-import bootWelcome from './bootWelcome';
+import TimeTask from './TimeTask';
+import SvrUtil from './SvrUtil';
+import WebSocket from 'ws';
+
 const EventEmitter = require('events');
 const rq = require('request-promise');
 
 class SvrBase extends EventEmitter implements Isvr {
-	#ident: string;
-	#pathMgr: TpathMgr;
-	#config: IconfSvr | IObj<any>;
+	readonly ident: string;
+	readonly pathMgr: TpathMgr;
+	readonly config: IconfUnit;
+	readonly configAll: IconfSvr;
+	readonly onSSL: boolean;
+	#TimeTask: TtimeTask;
 	// 是否处于暂停状态
 	#isPause: boolean;
-	// 是否采用了 SSL 协议
-	#isHttps: boolean;
+	#timTaskStoped: boolean;
+	#logger: WebSocket;
 	constructor(appDir: string) {
 		super();
-		this.#pathMgr = new PathMgr(appDir);
-		this.#ident = this.#pathMgr.svrForlder;
-		this.#config = preConf(this.#pathMgr);
+		this.pathMgr = new PathMgr(appDir);
+		this.ident = this.pathMgr.svrForlder;
+		this.configAll = preConf(this.pathMgr);
+		this.config = this.configAll.unit[this.ident];
+		this.#TimeTask = new TimeTask(this.pathMgr, this.configAll);
 		this.#isPause = false;
-		this.#isHttps = !!(this.#config.cert.key);
+		this.onSSL = !!(this.configAll.cert.key);
+		this.#timTaskStoped = false;
 
 		// 非请求响应的异常处理
 		this.on('error', (err: Error) => {
 			this.echo('监听到异常，详情如下：', '错误', 'ERR');
 			this.echo(err);
 		});
+
+		this.#logger = new WebSocket(this.configAll.loggerUrl);
+		this.#logger.on('close', () => {
+			this.exit('日志服务已终止，本服务也将随之终止.');
+		});
+		this.#logger.on('error', () => {
+			this.exit('日志写入失败，本服务也将随之终止.');
+		});
 	}
 
-	get pathMgr(): TpathMgr | IObj<any> {
-		return this.#pathMgr || {};
-	}
-
-	get config(): IconfUnit | IObj<any> {
-		return this.#config.unit[this.#ident] || {};
-	}
-
-	get configAll(): IconfSvr | IObj<any> {
-		return this.#config || {};
-	}
-
-	get status(): boolean {
+	get paused(): boolean {
 		return this.#isPause;
+	}
+
+	get addr(): string {
+		return (this.config.addr || this.configAll.addr)[this.configAll.isDev ? 0 : 1];
+	}
+
+	get port(): number {
+		return this.config.port;
+	}
+
+	/** 为服务端实例预置定时任务
+	 *
+	 * @param taskUnit 定时任务集合
+	 */
+	setTimeTask(...taskUnit: void[] | void[][]) {
+		this.#TimeTask.prepare(...taskUnit);
 	}
 
 	/** 输出服务端控制台回显
@@ -67,54 +95,75 @@ class SvrBase extends EventEmitter implements Isvr {
 		}
 	}
 
-	// preErr() {
-	// 	Terr
-	// }
-
-	/** 启动服务
+	/** 异常处理器
 	 *
+	 * @param msg 异常信息文本
 	 */
-	start() {
-		try {
-			bootWelcome(this.#isHttps, this.config.port, this.config.namezh);
-		} catch (err) {
-			this.echo((err as Error).message, '启动失败');
-			this.echo(err);
-			process.exit(1);
+	preErr(msg: string): void;
+	/** 异常处理器
+	 *
+	 * @param err JS/TS的 Error 对象
+	 */
+	preErr(err: Error): void;
+	/** 异常处理器
+	 *
+	 * @param msg 异常信息文本
+	 * @param errCode 基于 tFrameV9平台定义的错误码
+	 */
+	preErr(msg: string, errCode: ERR_TYPE): void;
+	/** 异常处理器
+	 *
+	 * @param err JS/TS的 Error 对象
+	 * @param errCode 基于 tFrameV9平台定义的错误码
+	 */
+	preErr(err: Error, errCode: ERR_TYPE): void;
+	/** 异常处理器
+	 *
+	 * @param msg 异常信息文本
+	 * @param errCode 基于 tFrameV9平台定义的错误码
+	 * @param toConsole 是否输出到控制台
+	 */
+	preErr(msg: string, errCode: ERR_TYPE, toConsole: boolean): void;
+	/** 异常处理器
+	 *
+	 * @param err JS/TS的 Error 对象
+	 * @param errCode 基于 tFrameV9平台定义的错误码
+	 * @param toConsole 是否输出到控制台
+	 */
+	preErr(err: Error, errCode: ERR_TYPE, toConsole: boolean): void;
+	preErr(a: string | Error, b?: ERR_TYPE | boolean, c?: boolean): void {
+		const _errObj: Terr = (((typeof a === 'string') && new Error(a)) || a) as Terr;
+		const isBoolB = typeof b === 'boolean';
+		if (b) {
+			_errObj.code = !isBoolB ? (b as ERR_TYPE) : ERR_TYPE.Unkown_ERR;
+		} else {
+			_errObj.code = ERR_TYPE.Unkown_ERR;
 		}
+		if (isBoolB || c) {
+			tEcho(typeof a === 'string' ? a : (a as Error).message, '异常', 'ERR');
+		}
+		this.emit('error', _errObj);
 	}
 
-	/** 停止服务
-	 *
-	 * @param msg 控制台消息
+	/** 创建日志
+	 * @param msgType 日志消息或
+	 * @param msg 日志消息或
+	 * @param currLogType 日志消息或
+	 * @param reqId 日志消息或
+	 * @param tag 日志消息或
 	 */
-	stop(msg?: string) {
-		tEcho(msg || '已停止服务端', '手动', 'WARN');
-		process.exit(0);
-	}
-
-	/** 暂停服务
-	 */
-	pause(): void {
-		this.#isPause = true;
-		this.echo('服务已暂停', '警告！', 'WARN');
-	}
-
-	/** 恢复服务
-	 */
-	resume(): void {
-		this.#isPause = false;
-		this.echo('服务已恢复', '信息', 'INFO');
-	}
-
-	/** 强制终止服务端启动
-	 *
-	 * @param msg 控制台提示信息
-	 * @param code 终止码
-	 */
-	exit(msg?: string, code?: number): void {
-		tEcho(msg || `[${this.config.namezh}]服务端无法启动`, '启动异常', 'ERR');
-		process.exit(code ?? 1);
+	setLog(msgType: MSG_TYPE, msg: string | Error, currLogType: INFO_TYPE | WARN_TYPE | ERR_TYPE, reqId?: number, tag?: string) {
+		this.#logger.send({
+			msgType,
+			msg,
+			currLogType,
+			reqId: reqId || -1,
+			tag
+		}, (err: Error | undefined) => {
+			if (err) {
+				this.exit('日志写入失败，服务已终止，请确保日志服务运行正常');
+			}
+		});
 	}
 
 	/** 服务端发起远程 HTTP 协议请求器
@@ -150,13 +199,77 @@ class SvrBase extends EventEmitter implements Isvr {
 		try {
 			return await rq(_obj);
 		} catch (err) {
-			this.emit('error', new Terr(err, ERR_TYPE.svrHttpRequestErr, true));
+			this.preErr(err, ERR_TYPE.Svr_Http_Request_Err);
 		}
 	}
 
-	// 服务端定时任务处理器
+	/** 启动服务
+	 *
+	 */
+	start() {
+		try {
+			this.#TimeTask.start();
+			this.#timTaskStoped = false;
+			const { appCopy, consoleStr } = smpoo();
+			// @ts-ignore
+			tEcho(consoleStr(), '', 'INFO');
+			tEcho(appCopy, '', 'INFO');
+			tEcho('-----------------------------------------------------------', '', 'INFO');
+			tEcho(`${tDate().format('YYYY-MM-DD hh:mi:sss')}\n\n`, '', 'INFO');
+			tEcho(`物理IP：${SvrUtil.getSvrIp().Main}`, '', 'INFO');
+			tEcho(`配置指向：${this.addr}`, '', 'INFO');
+			const _svrNameStr = !this.config.namezh ? '' : `[${this.config.namezh}]`;
+			tEcho(`${_svrNameStr}服务端已启动......\n\n    Enjoy it!\n\n`, `HTTP${this.onSSL ? '/s' : ''}：${this.port}`, 'SUCC');
+		} catch (err) {
+			this.echo((err as Error).message, '启动失败');
+			this.echo(err);
+			process.exit(1);
+		}
+	}
 
-	// 异常处理
+	/** 停止服务
+	 *
+	 * @param msg 控制台消息
+	 */
+	stop(msg?: string) {
+		this.#timTaskStoped = true;
+		this.#TimeTask.stop();
+		tEcho(msg || '已停止服务端', '手动', 'WARN');
+		process.exit(0);
+	}
+
+	/** 暂停服务
+	 * @param timeTaskAlso 同时停止本实例的定时任务
+	 */
+	pause(timeTaskAlso: boolean): void {
+		if (timeTaskAlso) {
+			this.#TimeTask.stop();
+			this.#timTaskStoped = true;
+		}
+		this.#isPause = true;
+		this.echo('服务已暂停', '警告！', 'WARN');
+	}
+
+	/** 恢复服务
+	 */
+	resume(): void {
+		if (this.#timTaskStoped) {
+			this.#TimeTask.start();
+		}
+		this.#isPause = false;
+		this.echo('服务已恢复', '信息', 'INFO');
+	}
+
+	/** 强制终止服务端启动
+	 *
+	 * @param msg 控制台提示信息
+	 * @param code 终止码
+	 */
+	exit(msg?: string, code?: number): void {
+		this.#TimeTask.stop();
+		tEcho(msg || `[${this.config.namezh}]服务端无法启动`, '启动异常', 'ERR');
+		process.exit(code ?? 1);
+	}
 }
 
 export default SvrBase;

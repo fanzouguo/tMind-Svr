@@ -1,12 +1,83 @@
 import type { ParsedPath } from 'path';
 import type { IObj, MSG_TYPE } from 'tmind-core';
-import type { ERR_TYPE } from '../enum';
 import type * as KoaApp from 'koa';
 
 declare namespace tmindSvr {
 	export declare type pathType = 'conf' | 'logs' | 'script' | 'cert' | 'license' | 'router' | 'task' | 'any';
 
 	export declare type httpMethod = 'GET' | 'POST' | 'PUT' | 'DELETE';
+
+	/* eslint-disable no-unused-vars */
+	export declare const enum INFO_TYPE {
+		/** 服务已启动
+		 */
+		Svr_Boot = 11000,
+		/** 服务已恢复
+		 */
+		Svr_Resumed = 11001,
+		/** 未标识的网络接入请求
+		 */
+		Req_In = 11101,
+		/** 输出未标识的网络请求响应
+		 */
+		Req_Out = 11102,
+		/** 接口请求
+		 */
+		Req_Io = 11103,
+		/** 数据库操作
+		 */
+		Exec_Db = 11103
+	}
+
+	export declare const enum WARN_TYPE {
+		/** 服务已停止
+		 */
+		Svr_Stoped = 12000,
+		/** 服务已暂停
+		 */
+		Svr_Paused = 12001
+	}
+
+	export declare const enum ERR_TYPE {
+		/** 未定义的异常
+		 */
+		Unkown_ERR = 13000,
+		/** 服务端启动异常
+		 */
+		Boot_Err = 13001,
+		/** 服务端 Licese 异常
+		 */
+		License_Err = 13002,
+		/** 服务端 SSL 文件异常
+		 */
+		Cert_Err = 13003,
+		/** 服务端配置异常
+		 */
+		Config_Err = 13004,
+		/** 服务端HTTP请求异常
+		 */
+		Svr_Http_Request_Err = 13005,
+		/** 数据库启动异常
+		 */
+		Db_Boot_Err = 13010,
+		/** SQL语句执行异常
+		 */
+		Sql_Err = 13011,
+		/** 接口连接异常
+		 */
+		Io_Link_Err = 13020,
+		/** 接口执行异常
+		 */
+		Io_Exec_Err = 13021,
+		/** 日志服务连接异常
+		 *
+		 */
+		Log_Link_Err = 13031,
+		/** 日志服务写入异常
+		 *
+		 */
+		Log_Write_Err = 13032
+	}
 
 	/** 请求响应成功的返回数据格式
 	 */
@@ -72,12 +143,12 @@ declare namespace tmindSvr {
 		/** 服务描述信息
 		 */
 		memo: string,
-		/** 服务地址元组，格式为[正式服务地址、测试服务地址]
+		/** 服务地址，配置管理器初始化时会自动根据 isDev ，从配置文件中该项的元组列表中判断有效的值
 		 */
-		addr: [string, string],
-		/** 服务端口，若为 Number 类型，则正式端口和测试端口保持一致，否则形同地址元组
+		addr: string,
+		/** 服务端口
 		 */
-		port: number | [number, number],
+		port: number,
 		/** 是否将本服务识别标识（ident）作为访问路由的一级前缀
 		 */
 		prefix?: boolean,
@@ -96,6 +167,9 @@ declare namespace tmindSvr {
 		/** 计划任务定时器
 		 */
 		schedule: string,
+		/** 本服务实例是否访问主业务DB服务(true为是，false表示不访问)
+		 */
+		linkToDb: boolean,
 		[k: string]: any
 	}
 
@@ -111,6 +185,10 @@ declare namespace tmindSvr {
 		/** 工程名称
 		 */
 		namezh: string,
+		/** 工程级默认服务地址，适用于子服务非分布式部署时的默认值
+		 *  工程级服务地址，若是下属各子服务具备独立地址，则需在子服务配置文件中单独指明
+		 */
+		addr: string,
 		/** SSL 验证文件
 		 */
 		cert: Icert,
@@ -123,6 +201,12 @@ declare namespace tmindSvr {
 		/** 是否为开发环境
 		 */
 		isDev: boolean,
+		/** 动态生成的日志服务连接地址
+		 */
+		loggerUrl: string,
+		/** 动态生成的数据库服务连接地址
+		 */
+		dbUrl: string,
 		/** 各服务单元的配置信息
 		 */
 		unit: IObj<IconfUnit>,
@@ -163,6 +247,46 @@ declare namespace tmindSvr {
 		 *	默认为：TRUE
 		*/
 		json?: boolean
+	}
+
+	/** 基于 tFrameV9平台定义的错误对象
+	 *
+	 */
+	export declare interface Terr extends Error {
+		/** 基于 tFrameV9平台定义的错误码
+		 *
+		 */
+		public code: ERR_TYPE;
+	}
+
+	/** 标准日志结构
+	 *
+	 */
+	export declare interface IsvrLog {
+		/** 日志ID，来源为入口请求ID或服务端实例ID
+		 */
+		logId: number,
+		/** 日志标签
+		 */
+		tag: string,
+		/** 日志描述
+		 */
+		msg: string,
+		/** 追踪栈
+		 */
+		stack: string,
+		/** 异常代码
+		 */
+		code: number,
+		/** 发生时间
+		 */
+		datatime: string,
+		/** 日志类型
+		 */
+		type: MSG_TYPE,
+		/** 日志级别
+		 */
+		level: INFO_TYPE | WARN_TYPE | ERR_TYPE
 	}
 }
 
@@ -227,93 +351,157 @@ declare module tmindSvr {
 		parse(pathStr: string): ParsedPath
 	}
 
-	/** 基于 tFrameV9平台定义的错误对象
+	/** 服务端定时任务调度器
 	 *
 	 */
-	export declare class Terr extends Error {
-		/** 基于 tFrameV9平台定义的错误码
-		 *
-		 */
-		public code: ERR_TYPE;
+	export declare class TimeTask {
 		/** 初始化构造
 		 *
-		 * @param msg 异常信息文本
+		 * @param currPath 服务实例的地址管理器
+		 * @param conf 服务实例的配置管理器
 		 */
-		constructor(msg: string);
-		/** 初始化构造
+		constructor(currPath: PathMgr, conf: tmindSvr.IconfSvr)
+		/** 预储备定时任务队列
 		 *
-		 * @param err JS/TS的 Error 对象
+		 * @param taskUnit 要储备的定时任务
 		 */
-		constructor(err: Error);
-		/** 初始化构造
+		prepare(...taskUnit: any)
+		/** 开始执行定时任务调度
 		 *
-		 * @param msg 异常信息文本
-		 * @param errCode 基于 tFrameV9平台定义的错误码
 		 */
-		constructor(msg: string, errCode: ERR_TYPE);
-		/** 初始化构造
+		start()
+		/** 停止定时任务调度器
 		 *
-		 * @param err JS/TS的 Error 对象
-		 * @param errCode 基于 tFrameV9平台定义的错误码
 		 */
-		constructor(err: Error, errCode: ERR_TYPE);
-		/** 初始化构造
+		stop()
+	}
+
+	/** 服务实例日志记录器
+	 *
+	 */
+	export declare class Logger {
+		/** 初始化
 		 *
-		 * @param msg 异常信息文本
-		 * @param errCode 基于 tFrameV9平台定义的错误码
-		 * @param toConsole 是否输出到控制台
+		 * @param currPath 日志记录器所挂载的服务实例的路径管理器
+		 * @param ident 日志记录器挂载的服务实例的标识
+		 * @param timeTasker 日志记录器挂载的服务实例的定时任务控制器
 		 */
-		constructor(msg: string, errCode: ERR_TYPE, toConsole: boolean);
-		/** 初始化构造
+		constructor(currPath: PathMgr, ident: string, timeTasker: TimeTask)
+		/** 写入基本日志记录信息
 		 *
-		 * @param err JS/TS的 Error 对象
-		 * @param errCode 基于 tFrameV9平台定义的错误码
-		 * @param toConsole 是否输出到控制台
+		 * @param msg 要写入日志的信息文本
+		 * @param currLogType 当前日志信息的自定义类型
+		 * @param reqId 触发该日志的请求ID
+		 * @param tag 日志标签
 		 */
-		constructor(err: Error, errCode: ERR_TYPE, toConsole: boolean);
+		setInfo(msg: string, currLogType: tmindSvr.INFO_TYPE, reqId?: number, tag?: string)
+		/** 写入警告信息
+		 *
+		 * @param msg 要写入的警告信息文本
+		 * @param currLogType 当前警告信息的自定义类型
+		 * @param reqId 触发该警告信息的请求ID
+		 * @param tag 日志标签
+		 */
+		setWarn(msg: string, currLogType: tmindSvr.WARN_TYPE, reqId?: number, tag?: string)
+		/** 写入异常日志
+		 *
+		 * @param err 要写入的异常 Error 对象，或异常信息文本
+		 * @param currLogType 当前异常的自定义类型
+		 * @param reqId 触发异常的请求ID
+		 * @param tag 日志标签
+		 */
+		setErr(err: Error | string, currLogType?: tmindSvr.ERR_TYPE, reqId?: number, tag?: string)
 	}
 
 	/** 服务端实例基类
 	 */
 	export declare class Isvr {
+		/** 服务实例标识
+		 */
+		readonly ident: string;
+
+		/** 服务实例的路径集成管理器
+		 */
+		readonly pathMgr: PathMgr;
+
+		/** 服务实例的配置集成管理器
+		 */
+		readonly configAll: tmindSvr.IconfSvr;
+
+		/** 服务实例配置集成管理器中，仅属于本服务的部分
+		 */
+		readonly config: tmindSvr.IconfUnit;
+
+		/** 服务实例是否运行于SSL安全协议之下
+		 */
+		readonly onSSL: boolean;
+
 		/** 初始化构造
 		 *
 		 * @param appDir 引用该类的 app 主程序路径（__dirname)
 		 */
 		constructor(appDir: string);
-		/** 获取服务实例的路径信息集合
+
+		/** 获取服务端是否为暂停状态
 		 */
-		get pathMgr(): PathMgr | IObj<any>;
-		/** 获取服务实例配置信息集合中，关于本实例的部分
+		get paused(): boolean;
+
+		/** 获取本服务实例基于配置的运行时地址指向
 		 */
-		get config(): tmindSvr.IconfUnit | IObj<any>;
-		/** 获取服务实例配置信息集合
+		get addr(): string;
+
+		/** 获取本服务实例基于配置的运行时端口
 		 */
-		get configAll(): tmindSvr.IconfSvr | IObj<any>;
+		get port(): number;
+
+		/** 为服务端实例预置定时任务
+		 * @param taskUnit 定时任务集合
+		 */
+		setTimeTask(...taskUnit: void[] | void[][]);
+
 		/** 输出服务端控制台回显
 		 * @param msg 要显示的信息正文
 		 * @param title 要显示的标题名称
 		 * @param msgType 要显示的信息类型
 		 */
 		echo(msg: any, title?: string, msgType?: MSG_TYPE): void;
-		/** 启动服务
+
+		/** 异常处理器
+		 *
+		 * @param msg 异常信息文本
 		 */
-		start(): void;
-		/** 停止服务
-		 * @param 控制台消息
+		preErr(msg: string): void;
+		/** 异常处理器
+		 *
+		 * @param err JS/TS的 Error 对象
 		 */
-		stop(msg?: string): void;
-		/** 暂停服务
+		preErr(err: Error): void;
+		/** 异常处理器
+		 *
+		 * @param msg 异常信息文本
+		 * @param errCode 基于 tFrameV9平台定义的错误码
 		 */
-		pause(): void;
-		/** 恢复服务
+		preErr(msg: string, errCode: tmindSvr.ERR_TYPE): void;
+		/** 异常处理器
+		 *
+		 * @param err JS/TS的 Error 对象
+		 * @param errCode 基于 tFrameV9平台定义的错误码
 		 */
-		resume(): void;
-		/** 强制终止服务端启动
-		 * @param msg 控制台提示信息
-		 * @param code 终止码
+		preErr(err: Error, errCode: tmindSvr.ERR_TYPE): void;
+		/** 异常处理器
+		 *
+		 * @param msg 异常信息文本
+		 * @param errCode 基于 tFrameV9平台定义的错误码
+		 * @param toConsole 是否输出到控制台
 		 */
-		exit(msg?: string, code?: number): void;
+		preErr(msg: string, errCode: tmindSvr.ERR_TYPE, toConsole: boolean): void;
+		/** 异常处理器
+		 *
+		 * @param err JS/TS的 Error 对象
+		 * @param errCode 基于 tFrameV9平台定义的错误码
+		 * @param toConsole 是否输出到控制台
+		 */
+		preErr(err: Error, errCode: tmindSvr.ERR_TYPE, toConsole: boolean): void;
 
 		/** 服务端发起远程 HTTP 协议请求器
 		 *
@@ -331,6 +519,30 @@ declare module tmindSvr {
 		 * @param opt HTTP 请求配置对象
 		 */
 		async http(url: string, opt?: tmindSvr.IsvrRequestOption): Promise<any>;
+
+		/** 启动服务
+		 */
+		start(): void;
+
+		/** 停止服务
+		 * @param msg 控制台消息
+		 */
+		stop(msg?: string): void;
+
+		/** 暂停服务
+		 * @param timeTaskAlso 同时停止本实例的定时任务
+		 */
+		pause(timeTaskAlso: boolean): void;
+
+		/** 恢复服务
+		 */
+		resume(): void;
+
+		/** 强制终止服务端启动
+		 * @param msg 控制台提示信息
+		 * @param code 终止码
+		 */
+		exit(msg?: string, code?: number): void;
 	}
 
 	/** 基于 KOA 的nodejs服务端

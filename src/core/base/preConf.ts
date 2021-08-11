@@ -36,26 +36,30 @@ const getUintConf = (): IconfUnit => {
 		ident: '',
 		namezh: '',
 		memo: '',
-		addr: ['', ''],
-		port: -1,
+		addr: '',
+		port: 0,
 		prefix: false,
 		corsed: false,
 		appendCorsHeader: [],
 		disableMethods: [],
 		corsWhiteList: [],
-		schedule: '* * * * * *'
+		schedule: '* * * * * *',
+		linkToDb: false
 	};
+};
+
+const getWebSocketUrl = (addr: string, port: number) => {
+	return `ws://${addr}:${port}`;
 };
 
 /** 初始化服务配置清单
  */
-export default (currPath: PathMgr): IconfSvr | IObj<any> => {
+export default (currPath: PathMgr): IconfSvr | never => {
 	try {
 		const rootPath = currPath.getPath('conf');
 		const _arr: string[] = fs.readdirSync(rootPath);
 		if (!_arr.includes(LICENSE_PATH)) {
-			terminat('授权文件缺失', MSG_BOOT_ERR, 0);
-			return {};
+			return terminat('授权文件缺失', MSG_BOOT_ERR, 0);
 		} else {
 			const pjIdent = currPath.rootForlder;
 			checkLicense(currPath, pjIdent);
@@ -63,6 +67,7 @@ export default (currPath: PathMgr): IconfSvr | IObj<any> => {
 				id: '',
 				ident: '',
 				namezh: '',
+				addr: '',
 				cert: {
 					key: '',
 					pem: ''
@@ -70,6 +75,8 @@ export default (currPath: PathMgr): IconfSvr | IObj<any> => {
 				secretKey: '',
 				ver: '1.0.0',
 				isDev: (process.env.NODE_ENV || '').toLowerCase() === 'dev',
+				loggerUrl: '',
+				dbUrl: '',
 				unit: {}
 			};
 			let i = 1;
@@ -81,22 +88,28 @@ export default (currPath: PathMgr): IconfSvr | IObj<any> => {
 						_obj.id = objFile.id;
 						_obj.ident = pjIdent;
 						_obj.namezh = objFile.namezh || terminat('工程名称配置项不允许为空', MSG_BOOT_ERR, 1);
+						_obj.addr = objFile.addr.map((v: string) => v || 'localhost')[_obj.isDev ? 0 : 1];
 						_obj.secretKey = objFile.secretKey || terminat('加盐码不能为空', MSG_BOOT_ERR, 1);
 					} else {
 						const _objUnit = getUintConf();
-						const { id, ident, namezh, memo, addr, port, prefix, corsed, appendCorsHeader, disableMethods, corsWhiteList, schedule, ...otherConf } = objFile;
+						const { id, ident, namezh, memo, addr, port, prefix, corsed, appendCorsHeader, disableMethods, corsWhiteList, schedule, linkToDb, ...otherConf } = objFile;
 						_objUnit.id = (!id || tempObj[`${id}`]) ? i : parseInt(objFile.id);
-						_objUnit.ident = `svr${v.replace(/\.js|\.conf/g, '')}`;
+						_objUnit.ident = v.replace(/Conf.js/g, '');
 						_objUnit.namezh = namezh;
 						_objUnit.memo = memo;
-						_objUnit.addr = addr || ['', ''];
-						_objUnit.port = port || 3000;
+						_objUnit.addr = addr.map((v: string) => v || 'localhost')[_obj.isDev ? 0 : 1];
+						// _objUnit.port = ((typeof port === 'number') && [port, port]) || ((Array.isArray(port)) && port);
+						_objUnit.port = port;
+
 						_objUnit.prefix = prefix ?? false;
 						_objUnit.corsed = corsed ?? false;
 						_objUnit.appendCorsHeader = appendCorsHeader || [];
 						_objUnit.disableMethods = disableMethods || [];
 						_objUnit.corsWhiteList = corsWhiteList || [];
 						_objUnit.schedule = schedule || '* * * * * *';
+						// 强制禁止 dbConf 配置为访问自身
+						_objUnit.linkToDb = (_objUnit.ident === 'db') ? false : !!(linkToDb);
+
 						for (const kConf in otherConf) {
 							_objUnit[kConf] = otherConf[kConf];
 						}
@@ -119,11 +132,27 @@ export default (currPath: PathMgr): IconfSvr | IObj<any> => {
 					}
 				}
 			}
+			if (!_obj?.unit?.log)
 			tempObj = null;
+
+			if (!_obj.unit?.log?.addr) {
+				terminat('日志服务配置缺少 addr 参数', MSG_BOOT_ERR, 1);
+			} else if (!_obj.unit?.log?.port) {
+				terminat('日志服务配置必须存在 port 参数，且不能为 0 或空', MSG_BOOT_ERR, 1);
+			} else {
+				_obj.loggerUrl = `ws://${_obj.unit.log.addr}:${_obj.unit.log.port}`;
+			}
+
+			if (!_obj.unit?.db?.addr) {
+				terminat('主业务数据库服务配置缺少 addr 参数', MSG_BOOT_ERR, 1);
+			} else if (!_obj.unit?.db?.port) {
+				terminat('日志服务配置必须存在 port 参数，且不能为 0 或空', MSG_BOOT_ERR, 1);
+			} else {
+				_obj.dbUrl = getWebSocketUrl(_obj.unit.db.addr, _obj.unit.db.port);
+			}
 			return _obj;
 		}
 	} catch (err) {
-		terminat('服务端私有配置文件丢失或读取异常', MSG_BOOT_ERR, 1);
-		return {};
+		return terminat('服务配置文件丢失或读取异常', MSG_BOOT_ERR, 1);
 	}
 };

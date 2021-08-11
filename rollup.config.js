@@ -58,7 +58,9 @@ const baseConfTs = {
 	external: [
 		'tmind-core',
 		'pg',
-		'koa'
+		'koa',
+		'node-schedule',
+		'node-json-db'
 	]
 };
 
