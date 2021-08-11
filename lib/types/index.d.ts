@@ -338,8 +338,9 @@ declare module tmindSvr {
 		 *
 		 * @param currPath 服务实例的地址管理器
 		 * @param conf 服务实例的配置管理器
+		 * @param ident 当前类所挂载的服务实例的标识
 		 */
-		constructor(currPath: PathMgr, conf: tmindSvr.IconfSvr)
+		constructor(currPath: PathMgr, conf: tmindSvr.IconfSvr, ident: string)
 		/** 预储备定时任务队列
 		 *
 		 * @param taskUnit 要储备的定时任务

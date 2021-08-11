@@ -1,7 +1,7 @@
 /** 任务定时器
  *
  */
-import type { IconfSvr, PathMgr } from '../../types';
+import type { IconfSvr, PathMgr, TimeTask as TimeTaskClass } from '../../types';
 const schedule = require('node-schedule');
 const NULL_SCHEDULE = '* * * * * *';
 
@@ -13,7 +13,7 @@ const runner = (ident: string, roleObj: typeof schedule.RecurrenceRule | typeof 
 });
 };
 
-class SvrTimeTask {
+class TimeTask implements TimeTaskClass {
 	#ident: string;
 	#role: typeof schedule.RecurrenceRule | typeof schedule.RecurrenceSpecDateRange | typeof schedule.RecurrenceSpecObjLit | Date | string | number;
 	#taskList: void[];
@@ -21,10 +21,11 @@ class SvrTimeTask {
 	 *
 	 * @param currPath 服务实例的地址管理器
 	 * @param conf 服务实例的配置管理器
+	 * @param ident 当前类所挂载的服务实例的标识
 	 */
-	constructor(currPath: PathMgr, conf: IconfSvr) {
-		this.#ident = currPath.svrForlder;
-		this.#role = conf.unit[this.#ident]?.schedule || NULL_SCHEDULE;
+	constructor(currPath: PathMgr, conf: IconfSvr, ident: string) {
+		this.#ident = ident;
+		this.#role = conf.unit[ident]?.schedule || NULL_SCHEDULE;
 		this.#taskList = [];
 		const taskPath = currPath.getPath('task');
 		if (currPath.isExist(`${taskPath}/index.?s`)) {
@@ -76,4 +77,4 @@ class SvrTimeTask {
 	}
 }
 
-export default SvrTimeTask;
+export default TimeTask;

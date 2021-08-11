@@ -40,7 +40,7 @@ class SvrBase extends EventEmitter implements Isvr {
 		this.ident = this.pathMgr.svrForlder.replace(/Svr/, '');
 		this.configAll = preConf(this.pathMgr);
 		this.config = this.configAll.unit[this.ident];
-		this.#TimeTask = new TimeTask(this.pathMgr, this.configAll);
+		this.#TimeTask = new TimeTask(this.pathMgr, this.configAll, this.ident);
 		this.#isPause = false;
 		this.onSSL = !!(this.configAll.cert.key);
 		this.#timTaskStoped = false;
