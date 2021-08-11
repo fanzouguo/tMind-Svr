@@ -258,7 +258,9 @@ class SvrBase extends EventEmitter implements Isvr {
 			tEcho(`配置指向：${this.config.addr}`, '', 'INFO');
 			const _svrNameStr = !this.config.namezh ? '' : `[${this.config.namezh}]`;
 			tEcho(`${_svrNameStr}服务端已启动......\n\n    Enjoy it!\n\n`, `HTTP${this.onSSL ? '/s' : ''}：${this.config.port}`, 'SUCC');
-			this.setInfo(`[${this.config.namezh}] Server is start at ${this.config.addr}:${this.config.port} in ${tDate().format('YYYY-MM-DD hh:mi:ss.ms')}`, INFO_TYPE.Svr_Boot, -1, 'boot', '', 'SUCC');
+			if (this.ident !== 'log') {
+				this.setInfo(`[${this.config.namezh}] Server is start at ${this.config.addr}:${this.config.port} in ${tDate().format('YYYY-MM-DD hh:mi:ss.ms')}`, INFO_TYPE.Svr_Boot, -1, 'boot', '', 'SUCC');
+			}
 		} catch (err) {
 			tEcho(err, '启动失败', 'ERR');
 			process.exit(1);
