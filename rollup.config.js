@@ -60,7 +60,8 @@ const baseConfTs = {
 		'pg',
 		'koa',
 		'node-schedule',
-		'node-json-db'
+		'node-json-db',
+		'ws'
 	]
 };
 
