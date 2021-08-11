@@ -14,7 +14,7 @@ const humanable = false;
 const splitSymbo = '.';
 
 const getFileName = () => tDate().format('YYYY-MM-DD');
-const getItemKey = () => tDate().format('.YYYY年.MM月.DD日.hh时.mi分');
+const getItemKey = () => tDate().format('.hh时.mi分');
 const getLogTime = () => tDate().format('YYYY-MM-DD hh:mi:ss.ms');
 
 class LogSvr extends BaseSvr implements LogSvrClass {

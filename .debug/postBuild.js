@@ -146,6 +146,8 @@ const reInstallLastVerInRootRepo = async () => {
 				echoLine();
 				echo(`当前根仓库上安装的${pkgName}版本号如下：`, '最新版', 'SUCC');
 				shelljs.exec(`yarn list ${pkgName}`);
+				echoLine();
+				echo('发布完成，请注意更改相关引用包的版本号！\n\n\n\n', '注意！！！', 'WARN');
 			} else {
 				echo('tMind-cli配置文件无效', '未找到根仓库路径', 'ERR');
 			}

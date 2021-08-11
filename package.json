@@ -1,7 +1,7 @@
 {
   "name": "tmind-svr",
-  "version": "2.2.33",
-  "description": "This project is automatic created by tMind-svr for tFrameV9 of smpoo Co. in 2021-03-13 07:02:42.668",
+  "version": "2.2.34",
+  "description": "The base class for tFrameV9 of shanghai smpoo soft comoration.",
   "private": false,
   "main": "lib/index.js",
   "module": "lib/index.esm.js",
@@ -106,5 +106,5 @@
     "typescript": "~4.2.2"
   },
   "createAt": "2021-03-13 07:02:42.668",
-  "lastBuild": "2021-08-12 03:39:27.831"
+  "lastBuild": "2021-08-12 07:06:29.235"
 }

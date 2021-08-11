@@ -45,15 +45,6 @@ class SvrBase extends EventEmitter implements Isvr {
 		this.onSSL = !!(this.configAll.cert.key);
 		this.#timTaskStoped = false;
 
-		process.on('SIGINT', (e: any) => {
-			const msg = `${this.config.namezh}服务已被强制终止`;
-			if (this.config.ident !== 'log') {
-				this.setWarn(msg, WARN_TYPE.Svr_Stoped, -1, 'stop');
-			}
-			tEcho(msg, '警告！', 'WARN');
-			process.exit(0);
-		});
-
 		// 非请求响应的异常处理
 		this.on('error', (err: Error) => {
 			this.setErr(err, ERR_TYPE.Svr_Catch_Err, -1, '监听到异常');
@@ -74,7 +65,7 @@ class SvrBase extends EventEmitter implements Isvr {
 			if (this.ident !== 'log') {
 				this.#logger = new WebSocket(this.configAll.loggerUrl);
 				this.#logger.on('open', () => {
-					this.setInfo('日志服务已连接', INFO_TYPE.Svr_Boot, -1, 'boot');
+					this.setInfo('已连接到日志服务', INFO_TYPE.Svr_Boot, -1, 'boot');
 					resolve('');
 				});
 				this.#logger.on('close', () => {

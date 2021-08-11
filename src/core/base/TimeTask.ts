@@ -10,7 +10,7 @@ const runner = (ident: string, roleObj: typeof schedule.RecurrenceRule | typeof 
 		if (typeof cb === 'function') {
 			cb();
 		}
-});
+	});
 };
 
 class TimeTask implements TimeTaskClass {
