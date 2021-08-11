@@ -7,7 +7,7 @@ import type { Isvr,
 	Terr,
 	TimeTask as TtimeTask
 } from '../../types';
-import type { MSG_TYPE, IObj } from 'tmind-core';
+import type { MSG_TYPE, IObj, nullLike } from 'tmind-core';
 import { tEcho, tDate, smpoo } from 'tmind-core';
 import { INFO_TYPE, WARN_TYPE, ERR_TYPE } from '../../types';
 import preConf from './preConf';
@@ -29,7 +29,7 @@ class SvrBase extends EventEmitter implements Isvr {
 	// 是否处于暂停状态
 	#isPause: boolean;
 	#timTaskStoped: boolean;
-	#logger: WebSocket;
+	#logger: WebSocket | nullLike = null;
 	constructor(appDir: string) {
 		super();
 		this.pathMgr = new PathMgr(appDir);
@@ -57,11 +57,18 @@ class SvrBase extends EventEmitter implements Isvr {
 			this.echo(err);
 		});
 
-		this.#logger = new WebSocket(this.configAll.loggerUrl);
-		this.#logger.on('close', () => {
+		const objLogger = new WebSocket(this.configAll.loggerUrl);
+		objLogger.on('open', (ws: WebSocket) => {
+			this.#logger = ws;
+			ws.send({}, (err: Error | undefined) => {
+				this.exit('启动日志写入失败，本服务也将随之终止.');
+			});
+			this.setLog('INFO', `[${this.config.namezh}]服务已启动`, INFO_TYPE.Svr_Boot, -1, '启动');
+		});
+		objLogger.on('close', () => {
 			this.exit('日志服务已终止，本服务也将随之终止.');
 		});
-		this.#logger.on('error', (err: IObj<any>) => {
+		objLogger.on('error', (err: IObj<any>) => {
 			if (err.code === 'ECONNREFUSED') {
 				this.exit('由于日志服务连接失败，服务终止了启动');
 			}
@@ -166,17 +173,19 @@ class SvrBase extends EventEmitter implements Isvr {
 	 * @param tag 日志消息或
 	 */
 	setLog(msgType: MSG_TYPE, msg: string | Error, currLogType: INFO_TYPE | WARN_TYPE | ERR_TYPE, reqId?: number, tag?: string) {
-		this.#logger.send({
-			msgType,
-			msg,
-			currLogType,
-			reqId: reqId || -1,
-			tag
-		}, (err: Error | undefined) => {
-			if (err) {
-				this.exit('日志写入失败，服务已终止，请确保日志服务运行正常');
-			}
-		});
+		if (this.#logger) {
+			this.#logger.send({
+				msgType,
+				msg,
+				currLogType,
+				reqId: reqId || -1,
+				tag
+			}, (err: Error | undefined) => {
+				if (err) {
+					this.exit('日志写入失败，服务已终止，请确保日志服务运行正常');
+				}
+			});
+		}
 	}
 
 	/** 服务端发起远程 HTTP 协议请求器

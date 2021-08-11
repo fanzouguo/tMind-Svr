@@ -72,7 +72,7 @@ class SvrTimeTask {
 	 *
 	 */
 	stop() {
-		schedule.cancel();
+		// schedule.cancel();
 	}
 }
 
