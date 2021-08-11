@@ -56,12 +56,18 @@ const baseConfTs = {
 	plugins,
 	// // 作用：指出应将哪些模块视为外部模块，否则会被打包进最终的代码里
 	external: [
-		'tmind-core',
+		'os',
 		'pg',
+		'ws',
 		'koa',
-		'node-schedule',
+		'path',
+		'fs-extra',
+		'glob-all',
+		'iconv-lite',
+		'tmind-core',
 		'node-json-db',
-		'ws'
+		'node-schedule',
+		'child_process'
 	]
 };
 
