@@ -66,23 +66,32 @@ class SvrBase extends EventEmitter implements Isvr {
 		process.on('unhandledRejection', (err: Error) => {
 			this.setErr(err, ERR_TYPE.Svr_UnHandled_Reject, -1, '未捕获的Reject');
 		});
+	}
 
-		// 建立与日志服务器的连接
-		if (this.ident !== 'log') {
-			this.#logger = new WebSocket(this.configAll.loggerUrl);
-			this.#logger.on('open', () => {
-				this.setInfo('日志服务已连接', INFO_TYPE.Svr_Boot, -1, 'boot');
-			});
-			this.#logger.on('close', () => {
-				this.exit('日志服务已终止，本服务也将随之终止.');
-			});
-			this.#logger.on('error', (err: IObj<any>) => {
-				if (err.code === 'ECONNREFUSED') {
-					this.exit('由于日志服务连接失败，服务终止了启动');
-				}
-				this.exit('日志写入失败，本服务也将随之终止.');
-			});
-		}
+	private connectToLog() {
+		return new Promise((resolve, reject) => {
+			// 建立与日志服务器的连接
+			if (this.ident !== 'log') {
+				this.#logger = new WebSocket(this.configAll.loggerUrl);
+				this.#logger.on('open', () => {
+					this.setInfo('日志服务已连接', INFO_TYPE.Svr_Boot, -1, 'boot');
+					resolve('');
+				});
+				this.#logger.on('close', () => {
+					this.exit('日志服务已终止，本服务也将随之终止.');
+					reject();
+				});
+				this.#logger.on('error', (err: IObj<any>) => {
+					reject(err.code);
+					if (err.code === 'ECONNREFUSED') {
+						this.exit('由于日志服务连接失败，服务终止了启动');
+					}
+					this.exit('日志写入失败，本服务也将随之终止.');
+				});
+			} else {
+				resolve('');
+			}
+		});
 	}
 
 	get paused(): boolean {
@@ -244,8 +253,11 @@ class SvrBase extends EventEmitter implements Isvr {
 	/** 启动服务
 	 *
 	 */
-	start() {
+	async start() {
 		try {
+			tEcho('连接日志服务...', '准备中', 'INFO');
+			await this.connectToLog();
+			tEcho('日志服务已连接', 'Next', 'SUCC');
 			this.#TimeTask.start();
 			this.#timTaskStoped = false;
 			const { appCopy, consoleStr } = smpoo();

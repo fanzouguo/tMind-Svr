@@ -69,7 +69,7 @@ class LogSvr extends BaseSvr implements LogSvrClass {
 		});
 	}
 
-	start() {
+	async start() {
 		this.setTimeTask((): void => {
 			try {
 				const _dtStr_ = getItemKey();

@@ -441,7 +441,7 @@ declare module tmindSvr {
 
 		/** 启动服务
 		 */
-		start(): void;
+		async start(): void;
 
 		/** 停止服务
 		 * @param msg 控制台消息
