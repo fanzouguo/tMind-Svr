@@ -1,3 +1,4 @@
+const { tDate } = require('tmind-core');
 const shelljs = require('shelljs');
 const inquirer = require('inquirer');
 const fs = require('fs-extra');
@@ -44,21 +45,6 @@ const echo = (msg, title, type) => {
 
 const echoLine = () => console.log('\n----------------------------------------------------------------------------\n');
 
-const frm = (str, len = 2) => {
-	return `${str}`.padStart(len, '0');
-};
-
-const getDate = () => {
-	const _dt = new Date();
-	const _y = _dt.getFullYear();
-	const _m = frm(_dt.getMonth() + 1);
-	const _d = frm(_dt.getDate());
-	const _hh = frm(_dt.getHours());
-	const _mi = frm(_dt.getMinutes());
-	const _ss = frm(_dt.getSeconds());
-	return `${_y}-${_m}-${_d} ${_hh}:${_mi}:${_ss}`;
-};
-
 const getGitCmd = (memo, pkg, tagThis = false, branch = 'main') => {
 	const urlStr = (pkg && pkg.repository && (pkg.repository.url || '')) || '';
 	const _arr = ['git add .'];
@@ -66,7 +52,7 @@ const getGitCmd = (memo, pkg, tagThis = false, branch = 'main') => {
 	if (tagThis) {
 		_arr.push(`git tag -a v${pkg.version} -m "${memo}"`);
 	}
-	_arr.push(`git commit -m "(${getDate()})${memo}"`);
+	_arr.push(`git commit -m "(${tDate().format('YYYY-MM-DD hh:mi:ss')})${memo}"`);
 
 	if (tagThis) {
 		_arr.push('git push origin --tags');

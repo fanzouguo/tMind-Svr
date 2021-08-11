@@ -83,7 +83,7 @@ const outputConf = [{
 
 const TsConf = outputConf.map(v => {
 	if (isProd) {
-		// baseConfTs.plugins.push(terser());
+		baseConfTs.plugins.push(terser());
 		v.banner = banner;
 	}
 	return Object.assign({}, baseConfTs, {

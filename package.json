@@ -1,6 +1,6 @@
 {
   "name": "tmind-svr",
-  "version": "2.2.22",
+  "version": "2.2.26",
   "description": "This project is automatic created by tMind-svr for tFrameV9 of smpoo Co. in 2021-03-13 07:02:42.668",
   "private": false,
   "main": "lib/index.js",
@@ -11,9 +11,11 @@
     "clean": "shx rm -rf lib",
     "prePkg": "yarn lint && yarn clean",
     "pkg": "rollup -c rollup.config.js",
+    "pkgPure": "rollup -c rollup.config.pure.js",
     "dev": "yarn prePkg && cross-env NODE_ENV=dev yarn pkg -w",
     "dev:debug": "nodemon --config ./nodemon.json --inspect-brk ./src/try.ts",
     "build": "yarn prePkg && node ./.debug/preBuild.js && cross-env NODE_ENV=prod  yarn pkg && node ./.debug/postBuild.js",
+    "build:pure": "yarn prePkg && node ./.debug/preBuild.js && cross-env NODE_ENV=prod  yarn pkgPure && node ./.debug/postBuild.js",
     "lint": "eslint src --ext .ts",
     "test": "cross-env NODE_ENV=test && jest",
     "test-c": "yarn test --coverage",
@@ -104,5 +106,5 @@
     "typescript": "~4.2.2"
   },
   "createAt": "2021-03-13 07:02:42.668",
-  "lastBuild": "2021-08-12 01:55:29.244"
+  "lastBuild": "2021-08-12 02:15:50.924"
 }
