@@ -8,6 +8,8 @@
 
 1. 修改 rollup配置的不打包列表
 
-1. types/index.d.ts 中的命名空间
+1. tsconfig.json 中 path -> tmind 改为相应的包名（小驼峰）
 
-1. "createAt": 字段
+2. types/index.d.ts 中的命名空间
+
+3. "createAt": 字段

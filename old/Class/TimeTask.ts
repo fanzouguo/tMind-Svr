@@ -22,7 +22,7 @@ class SvrTimeTask {
 	 * @param taskUnit 手工传入的定时任务函数，或函数数组
 	 */
 	constructor(currPath: PathMgr, conf: IconfSvr) {
-		this.#ident = currPath.svrForlder;
+		this.#ident = currPath.svrFolder;
 		this.#role = conf.unit[this.#ident]?.schedule || NULL_SCHEDULE;
 		this.#taskList = [];
 		const taskPath = currPath.getPath('task');

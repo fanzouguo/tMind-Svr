@@ -41,7 +41,7 @@ class Svr extends Koa implements Isvr {
 		// 	terminat('未识别到环境变量，请使用package.json文件脚本命令执行启动.', 2);
 		// }
 		this.#app = app || new Koa();
-		this.#ident = this.#pathMgr.svrForlder;
+		this.#ident = this.#pathMgr.svrFolder;
 		// 初始化配置参数
 		this.#conf = preConf(this.#pathMgr);
 		this.#isPause = false;

@@ -214,19 +214,19 @@ export declare class  PathMgr {
 	constructor()
 	/** 获取工程实例所在基地址的文件夹名称
 	 */
-	get rootForlder(): string
+	get rootFolder(): string
 	/** 获取工程实例所在基地址
 	 */
 	get rootPath(): string
 	/** 获取服务实例所在根地址的文件夹名称
 	 */
-	get svrForlder(): string
+	get svrFolder(): string
 	/** 获取服务实例根地址
 	 */
 	get svrPath(): string
 	/** 获取启动文件所在的文件夹名称
 	 */
-	get appForlder(): string
+	get appFolder(): string
 	/** 获取启动文件所在的路径
 	 */
 	get appPath(): string

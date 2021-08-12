@@ -37,7 +37,7 @@ class SvrBase extends EventEmitter implements Isvr {
 		super();
 		this.showLog = false;
 		this.pathMgr = new PathMgr(appDir);
-		this.ident = this.pathMgr.svrForlder.replace(/Svr/, '');
+		this.ident = this.pathMgr.svrFolder.replace(/Svr/, '');
 		this.configAll = preConf(this.pathMgr);
 		this.config = this.configAll.unit[this.ident];
 		this.#TimeTask = new TimeTask(this.pathMgr, this.configAll, this.ident);

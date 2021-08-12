@@ -52,7 +52,7 @@ module.exports = (currPath: PathMgr): IconfSvr => {
 		const rootPath = currPath.getPath('conf');
 		const _arr: string[] = fs.readdirSync(rootPath);
 		if (!_arr.includes(LICENSE_PATH)) terminat('授权文件缺失', 0);
-		const pjIdent = currPath.rootForlder;
+		const pjIdent = currPath.rootFolder;
 		checkLicense(currPath, pjIdent);
 		const _obj: IconfSvr = {
 			id: '',

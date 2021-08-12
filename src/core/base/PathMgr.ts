@@ -29,7 +29,7 @@ class PathMgr implements TpathMgr {
 	/** 获取工程实例所在基地址的文件夹名称
 	 *
 	 */
-	get rootForlder(): string {
+	get rootFolder(): string {
 		return path.parse(this.rootPath).base;
 	}
 
@@ -43,7 +43,7 @@ class PathMgr implements TpathMgr {
 	/** 获取服务实例所在根地址的文件夹名称
 	 *
 	 */
-	get svrForlder(): string {
+	get svrFolder(): string {
 		return path.parse(this.#basePath).base;
 	}
 
@@ -57,7 +57,7 @@ class PathMgr implements TpathMgr {
 	/** 获取启动文件所在的文件夹名称
 	 *
 	 */
-	get appForlder(): string {
+	get appFolder(): string {
 		return path.parse(this.#appPath).base;
 	}
 

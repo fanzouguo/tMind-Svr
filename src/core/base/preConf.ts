@@ -61,7 +61,7 @@ export default (currPath: PathMgr): IconfSvr | never => {
 		if (!_arr.includes(LICENSE_PATH)) {
 			return terminat('授权文件缺失', MSG_BOOT_ERR, 0);
 		} else {
-			const pjIdent = currPath.rootForlder;
+			const pjIdent = currPath.rootFolder;
 			checkLicense(currPath, pjIdent);
 			const _obj: IconfSvr = {
 				id: '',
