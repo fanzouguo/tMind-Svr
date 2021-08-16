@@ -477,17 +477,6 @@ declare module tmindSvr {
 		get app(): KoaApp;
 	}
 
-	/** 面向 DB 互操作的服务端
-	 *
-	 */
-	export declare class DbSvr extends Isvr {
-		/** 初始化构造
-		 *
-		 * @param appDir 引用该类的 app 主程序路径（__dirname)
-		 */
-		constructor(appDir: string);
-	}
-
 	export declare class LogSvr extends Isvr {
 		/** 初始化构造
 		 *

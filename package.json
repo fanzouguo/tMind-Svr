@@ -1,7 +1,7 @@
 {
   "name": "tmind-svr",
-  "version": "2.2.36",
-  "description": "The base class for tFrameV9 of shanghai smpoo soft comoration.",
+  "version": "2.2.37",
+  "description": "The base class for tFrameV9 of shanghai smpoo soft Co., Ltd.",
   "private": false,
   "main": "lib/index.js",
   "module": "lib/index.esm.js",
@@ -86,5 +86,5 @@
     "typescript": "~4.2.2"
   },
   "createAt": "2021-03-13 07:02:42.668",
-  "lastBuild": "2021-08-12 10:29:16.194"
+  "lastBuild": "2021-08-16 17:28:42.628"
 }
