@@ -1,7 +1,7 @@
 // import BaseSvrClass from './core/base';
 // import KoaSvrClass from'./core/koaSvr';
 // import LogSvrClass from './core/logSvr';
-const BaseSvr = require('./core/base/index');
+import BaseSvr from './core/base';
 
 // export const KoaSvr = KoaSvrClass;
 // export const LogSvr = LogSvrClass;
