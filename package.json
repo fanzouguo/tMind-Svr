@@ -1,6 +1,6 @@
 {
   "name": "tmind-svr",
-  "version": "2.2.37",
+  "version": "2.2.38",
   "description": "The base class for tFrameV9 of shanghai smpoo soft Co., Ltd.",
   "private": false,
   "main": "lib/index.js",
@@ -8,19 +8,8 @@
   "type": "commonjs",
   "types": "lib/types/index.d.ts",
   "scripts": {
-    "clean": "shx rm -rf lib",
-    "prePkg": "yarn lint && yarn clean",
-    "pkg": "rollup -c rollup.config.js",
-    "pkgPure": "rollup -c rollup.config.pure.js",
-    "dev": "yarn prePkg && cross-env NODE_ENV=dev yarn pkg -w",
-    "dev:debug": "nodemon --config ./nodemon.json --inspect-brk ./src/try.ts",
-    "build": "yarn prePkg && node ./.debug/preBuild.js && cross-env NODE_ENV=prod  yarn pkgPure && node ./.debug/postBuild.js",
-    "build:unPure": "yarn prePkg && node ./.debug/preBuild.js && cross-env NODE_ENV=prod  yarn pkg && node ./.debug/postBuild.js",
-    "lint": "eslint src --ext .ts",
-    "test": "cross-env NODE_ENV=test && jest",
-    "test-c": "yarn test --coverage",
-    "try": "nodemon -w ./.debug/useage.js node ./.debug/tryConsole.js",
-    "doc": "node ./.debug/tryOutput.js"
+    "dev": "node ./.dev/dev.js",
+    "build": "cross-env NODE_ENV=prod && node ./.dev/index.js"
   },
   "repository": {
     "type": "git",
@@ -42,7 +31,7 @@
     "node-schedule": "^2.0.0",
     "openssl-nodejs": "^1.0.5",
     "request-promise": "^4.2.6",
-    "tmind-core": "^2.2.144",
+    "tmind-core": "^3.3.28",
     "ws": "^8.0.0"
   },
   "devDependencies": {

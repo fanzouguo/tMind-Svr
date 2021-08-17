@@ -1,0 +1,27 @@
+
+{
+  "restartable": "rs",
+  "ignore": [
+    ".git",
+		".vscode",
+		"lib",
+    "node_modules/*",
+		".eslintignore",
+		".eslintrc.js",
+		".gitignore",
+		".npmignore",
+		".prettierrc.js",
+		"babelrc.config.js",
+		"nodemon.json",
+		"package.json",
+		"tsconfig.json"
+  ],
+  "watch": ["src/"],
+  "execMap": {
+    "ts": "node -r ts-node/register"
+  },
+  "env": {
+    "NODE_ENV": "development"
+  },
+  "ext": "js,json"
+}
