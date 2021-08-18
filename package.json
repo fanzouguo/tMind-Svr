@@ -1,6 +1,6 @@
 {
   "name": "tmind-svr",
-  "version": "3.2.40",
+  "version": "4.2.40",
   "description": "The base class for tFrameV9 of shanghai smpoo soft Co., Ltd.",
   "private": false,
   "main": "lib/index.js",
