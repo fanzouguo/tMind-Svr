@@ -483,7 +483,7 @@ declare module tmindSvr {
 		 * @param dbIdent 数据库名称
 		 * @param type 数据库类型
 		 */
-		protected init(dbIdent: string);
+		private init(dbIdent: string);
 		/** 销毁驱动实例
 		 *
 		 */
