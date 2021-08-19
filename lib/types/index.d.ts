@@ -1,4 +1,4 @@
-import type { IObj, MSG_TYPE, dbRule } from 'tmind-core';
+import type { IObj, MSG_TYPE } from 'tmind-core';
 import type { ParsedPath } from 'path';
 
 declare namespace tmindSvr {
@@ -468,18 +468,31 @@ declare module tmindSvr {
 	 */
 	export declare abstract class DbProvider {
 		constructor(conf: tmindSvr.IconfUnit);
-		// 事务
-		transe(sqlStr: string);
+		/** 以事务执行指定SQL语句/语句集
+		 *
+		 * @param sqlStr 要执行的SQL语句
+		 */
+		transe(sqlStr: string[]);
 
-		// 直接执行非事务语句
-		execer(sqlStr: string);
+		/** 直接执行非事务语句
+		 *
+		 * @param sqlStr
+		 */
+		execer(sqlStr: string | string[]);
 
-		// 初始化
-		init(dbIdent: string, type: dbRule.dbInitType);
+		/** 驱动初始化
+		 *
+		 * @param dbIdent 数据库名称
+		 * @param type 数据库类型
+		 */
+		init(dbIdent: string);
 
+		/** 销毁驱动实例
+		 *
+		 */
 		destroy();
 
-		/** 数据库备份函数
+		/** 数据库备份
 		 *
 		 */
 		backup(): void;
