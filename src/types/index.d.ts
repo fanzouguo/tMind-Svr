@@ -1,6 +1,5 @@
 import type { ParsedPath } from 'path';
 import type { IObj, MSG_TYPE } from 'tmind-core';
-import type * as KoaApp from 'koa';
 
 declare namespace tmindSvr {
 	export declare type pathType = 'conf' | 'logs' | 'script' | 'cert' | 'license' | 'router' | 'task' | 'any';
@@ -358,7 +357,7 @@ declare module tmindSvr {
 
 	/** 服务端实例基类
 	 */
-	export declare class Isvr {
+	export declare class BaseSvr {
 		/** 服务实例标识
 		 */
 		readonly ident: string;
@@ -463,26 +462,6 @@ declare module tmindSvr {
 		 * @param code 终止码
 		 */
 		exit(msg?: string, code?: number): void;
-	}
-
-	/** 基于 KOA 的nodejs服务端
-	 *
-	 */
-	export declare class KoaSvr extends Isvr {
-		/** 初始化构造
-		 *
-		 * @param appDir 引用该类的 app 主程序路径（__dirname)
-		 */
-		constructor(appDir: string);
-		get app(): KoaApp;
-	}
-
-	export declare class LogSvr extends Isvr {
-		/** 初始化构造
-		 *
-		 * @param appDir 引用该类的 app 主程序路径（__dirname)
-		 */
-		constructor(appDir: string);
 	}
 }
 
