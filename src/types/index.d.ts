@@ -1,5 +1,5 @@
+import type { IObj, MSG_TYPE, dbRule } from 'tmind-core';
 import type { ParsedPath } from 'path';
-import type { IObj, MSG_TYPE } from 'tmind-core';
 
 declare namespace tmindSvr {
 	export declare type pathType = 'conf' | 'logs' | 'script' | 'cert' | 'license' | 'router' | 'task' | 'any';
@@ -462,6 +462,27 @@ declare module tmindSvr {
 		 * @param code 终止码
 		 */
 		exit(msg?: string, code?: number): void;
+	}
+
+	/** tFrame Db驱动
+	 */
+	export declare abstract class DbProvider {
+		constructor(conf: tmindSvr.IconfUnit);
+		// 事务
+		transe(sqlStr: string);
+
+		// 直接执行非事务语句
+		execer(sqlStr: string);
+
+		// 初始化
+		init(dbIdent: string, type: dbRule.dbInitType);
+
+		destroy();
+
+		/** 数据库备份函数
+		 *
+		 */
+		backup(): void;
 	}
 }
 
