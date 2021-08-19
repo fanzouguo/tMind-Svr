@@ -472,30 +472,26 @@ declare module tmindSvr {
 		 *
 		 * @param sqlStr 要执行的SQL语句
 		 */
-		transe(sqlStr: string[]);
-
+		async transe(sqlStr: string[]);
 		/** 直接执行非事务语句
 		 *
 		 * @param sqlStr
 		 */
-		execer(sqlStr: string | string[]);
-
+		async execer(sqlStr: string | string[]);
 		/** 驱动初始化
 		 *
 		 * @param dbIdent 数据库名称
 		 * @param type 数据库类型
 		 */
-		init(dbIdent: string);
-
+		protected init(dbIdent: string);
 		/** 销毁驱动实例
 		 *
 		 */
 		destroy();
-
 		/** 数据库备份
 		 *
 		 */
-		backup(): void;
+		async backup(): void;
 	}
 }
 
