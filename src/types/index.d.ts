@@ -111,99 +111,6 @@ declare namespace tmindSvr {
 		isErr?: boolean
 	}
 
-	/** 支持的 SSL 文件类型
-	 */
-	export declare interface Icert {
-		key: string,
-		pem?: string,
-		ca?: string[],
-		cert?: string
-	}
-
-	/** 服务单元配置模型
-	 */
-	export declare interface IconfUnit {
-		// 服务索引序号
-		id: number,
-		/** 服务端实例标识
-		 */
-		ident: string,
-		/** 服务显示名称
-		 */
-		namezh: string,
-		/** 服务描述信息
-		 */
-		memo: string,
-		/** 服务地址，配置管理器初始化时会自动根据 isDev ，从配置文件中该项的元组列表中判断有效的值
-		 */
-		addr: string,
-		/** 服务端口
-		 */
-		port: number,
-		/** 是否将本服务识别标识（ident）作为访问路由的一级前缀
-		 */
-		prefix?: boolean,
-		/** 本服务是否支持跨域
-		 */
-		corsed?: boolean,
-		/** 额外添加的跨域响应头
-		 */
-		appendCorsHeader: string[],
-		/** 禁用的 http 方法，
-		 */
-		disableMethods: string[],
-		/** 跨域白名单
-		 */
-		corsWhiteList: string[],
-		/** 计划任务定时器
-		 */
-		schedule: string,
-		/** 本服务实例是否访问主业务DB服务(true为是，false表示不访问)
-		 */
-		linkToDb: boolean,
-		[k: string]: any
-	}
-
-	/** 实例配置
-	 */
-	export declare interface IconfSvr {
-		/** 工程对应的平台蓝图根节点ID
-		 */
-		id: string,
-		/** 工程识别标识
-		 */
-		ident: string,
-		/** 工程名称
-		 */
-		namezh: string,
-		/** 工程级默认服务地址，适用于子服务非分布式部署时的默认值
-		 *  工程级服务地址，若是下属各子服务具备独立地址，则需在子服务配置文件中单独指明
-		 */
-		addr: string,
-		/** SSL 验证文件
-		 */
-		cert: Icert,
-		/** token 加盐码
-		 */
-		secretKey: string,
-		/** 工程版本号
-		 */
-		ver: string,
-		/** 是否为开发环境
-		 */
-		isDev: boolean,
-		/** 动态生成的日志服务连接地址
-		 */
-		loggerUrl: string,
-		/** 动态生成的数据库服务连接地址
-		 */
-		dbUrl: string,
-		/** 各服务单元的配置信息
-		 */
-		unit: IObj<IconfUnit>,
-		[k: string]: any
-	}
-
 	/** 本机IP信息载荷
 	 */
 	export declare interface IipInfo {
@@ -462,36 +369,6 @@ declare module tmindSvr {
 		 * @param code 终止码
 		 */
 		exit(msg?: string, code?: number): void;
-	}
-
-	/** tFrame Db驱动
-	 */
-	export declare abstract class DbProvider {
-		constructor(conf: tmindSvr.IconfUnit);
-		/** 以事务执行指定SQL语句/语句集
-		 *
-		 * @param sqlStr 要执行的SQL语句
-		 */
-		async transe(sqlStr: string[]);
-		/** 直接执行非事务语句
-		 *
-		 * @param sqlStr
-		 */
-		async execer(sqlStr: string | string[]);
-		/** 驱动初始化
-		 *
-		 * @param dbIdent 数据库名称
-		 * @param type 数据库类型
-		 */
-		private init(dbIdent: string);
-		/** 销毁驱动实例
-		 *
-		 */
-		destroy();
-		/** 数据库备份
-		 *
-		 */
-		async backup(): void;
 	}
 }
 

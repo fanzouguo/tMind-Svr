@@ -1,6 +1,6 @@
 {
   "name": "tmind-svr",
-  "version": "6.0.4",
+  "version": "7.0.0",
   "description": "The base class for tFrameV9 of shanghai smpoo soft Co., Ltd.",
   "private": false,
   "main": "lib/index.js",
@@ -31,7 +31,7 @@
     "node-schedule": "^2.0.0",
     "openssl-nodejs": "^1.0.5",
     "request-promise": "^4.2.6",
-    "tmind-core": "^4.0.0",
+    "tmind-core": "^4.4.2",
     "ws": "^8.0.0"
   },
   "devDependencies": {

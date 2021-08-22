@@ -1,13 +1,11 @@
 import type { BaseSvr as BaseSvrClass,
 	PathMgr as TpathMgr,
-	IconfSvr,
-	IconfUnit,
 	IsvrRequestOption,
 	httpMethod,
 	TimeTask as TtimeTask,
 	IsvrLog
 } from './types';
-import type { MSG_TYPE, IObj } from 'tmind-core';
+import type { MSG_TYPE, IObj, ISvrConf } from 'tmind-core';
 import { tEcho, tDate, smpoo } from 'tmind-core';
 import { INFO_TYPE, WARN_TYPE, ERR_TYPE } from './types';
 import preConf from './core/base/preConf';
@@ -22,8 +20,8 @@ const rq = require('request-promise');
 class BaseSvr extends EventEmitter implements BaseSvrClass {
 	readonly ident: string;
 	readonly pathMgr: TpathMgr;
-	readonly config: IconfUnit;
-	readonly configAll: IconfSvr;
+	readonly config: ISvrConf.IConfUnit;
+	readonly configAll: ISvrConf.IConfSvr;
 	readonly onSSL: boolean;
 	/** 在终端控制台实时显示日志输出
 	 */
