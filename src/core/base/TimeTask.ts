@@ -1,7 +1,8 @@
 /** 任务定时器
  *
  */
-import type { IconfSvr, PathMgr, TimeTask as TimeTaskClass } from '../../types';
+import type { ISvrConf } from 'tmind-core';
+import type { PathMgr, TimeTask as TimeTaskClass } from '../../types';
 const schedule = require('node-schedule');
 const NULL_SCHEDULE = '* * * * * *';
 
@@ -23,7 +24,7 @@ class TimeTask implements TimeTaskClass {
 	 * @param conf 服务实例的配置管理器
 	 * @param ident 当前类所挂载的服务实例的标识
 	 */
-	constructor(currPath: PathMgr, conf: IconfSvr, ident: string) {
+	constructor(currPath: PathMgr, conf: ISvrConf.IConfSvr, ident: string) {
 		this.#ident = ident;
 		this.#role = conf.unit[ident]?.schedule || NULL_SCHEDULE;
 		this.#taskList = [];
