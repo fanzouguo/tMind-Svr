@@ -1,5 +1,5 @@
-import type { IObj } from 'tmind-core';
-import type { IconfSvr, IconfUnit, PathMgr } from '../../types';
+import type { IObj, ISvrConf } from 'tmind-core';
+import type { PathMgr } from '../../types';
 import terminat from '../../util/terminat';
 const fs = require('fs-extra');
 
@@ -30,7 +30,7 @@ const checkLicense = (currPath: PathMgr, ident: string): boolean => {
 	}
 };
 
-const getUintConf = (): IconfUnit => {
+const getUintConf = (): ISvrConf.IConfUnit => {
 	return {
 		id: -1,
 		ident: '',
@@ -54,7 +54,7 @@ const getWebSocketUrl = (addr: string, port: number) => {
 
 /** 初始化服务配置清单
  */
-export default (currPath: PathMgr): IconfSvr | never => {
+export default (currPath: PathMgr): ISvrConf.IConfSvr | never => {
 	try {
 		const rootPath = currPath.getPath('conf');
 		const _arr: string[] = fs.readdirSync(rootPath);
@@ -63,7 +63,7 @@ export default (currPath: PathMgr): IconfSvr | never => {
 		} else {
 			const pjIdent = currPath.rootFolder;
 			checkLicense(currPath, pjIdent);
-			const _obj: IconfSvr = {
+			const _obj: ISvrConf.IConfSvr = {
 				id: '',
 				ident: '',
 				namezh: '',
@@ -111,6 +111,7 @@ export default (currPath: PathMgr): IconfSvr | never => {
 						_objUnit.linkToDb = (_objUnit.ident === 'db') ? false : !!(linkToDb);
 
 						for (const kConf in otherConf) {
+							// @ts-ignore
 							_objUnit[kConf] = otherConf[kConf];
 						}
 
