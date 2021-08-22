@@ -1,4 +1,4 @@
-import type { IObj, MSG_TYPE } from 'tmind-core';
+import type { IObj, MSG_TYPE, ISvrConf } from 'tmind-core';
 import type { ParsedPath } from 'path';
 
 declare namespace tmindSvr {
@@ -246,7 +246,7 @@ declare module tmindSvr {
 		 * @param conf 服务实例的配置管理器
 		 * @param ident 当前类所挂载的服务实例的标识
 		 */
-		constructor(currPath: PathMgr, conf: tmindSvr.IconfSvr, ident: string)
+		constructor(currPath: PathMgr, conf: ISvrConf.IConfSvr, ident: string)
 		/** 预储备定时任务队列
 		 *
 		 * @param taskUnit 要储备的定时任务
@@ -275,11 +275,11 @@ declare module tmindSvr {
 
 		/** 服务实例的配置集成管理器
 		 */
-		readonly configAll: tmindSvr.IconfSvr;
+		readonly configAll: ISvrConf.IConfSvr;
 
 		/** 服务实例配置集成管理器中，仅属于本服务的部分
 		 */
-		readonly config: tmindSvr.IconfUnit;
+		readonly config: ISvrConf.IconfUnit;
 
 		/** 服务实例是否运行于SSL安全协议之下
 		 */
